@@ -13,12 +13,40 @@
 <body class="py-12">
 
 <div class="max-w-4xl mx-auto px-4">
-    <nav class="mb-12"><a href="/dashboard" class="text-stone-400 hover:text-stone-800 text-sm font-medium">← На главную</a></nav>
 
-    <div class="text-center mb-12">
-        <h1 class="text-4xl font-bold text-stone-800 mb-4">Партнеры системы</h1>
-        <div th:if="${param.success}" class="bg-green-100 text-green-700 p-3 rounded-lg mb-4">Заявка отправлена!</div>
+    <!-- БЛОК ДЛЯ ТЕХ, КТО УЖЕ В КОМПАНИИ -->
+    <div th:if="${userCompany != null}" class="text-center py-10">
+        <div class="bg-white p-10 rounded-3xl shadow-xl border border-amber-100 max-w-lg mx-auto">
+            <div class="mb-6 flex justify-center">
+                <!-- Твой "умный логотип" или буква -->
+                <div th:if="${userCompany.logoUrl == null || userCompany.logoUrl.isEmpty()}"
+                     class="w-24 h-24 rounded-2xl bg-stone-800 text-white flex items-center justify-center font-bold text-4xl"
+                     th:text="${userCompany.name.substring(0,1)}"></div>
+                <img th:if="${userCompany.logoUrl != null && !userCompany.logoUrl.isEmpty()}"
+                     th:src="${userCompany.logoUrl}" class="w-24 h-24 rounded-2xl object-cover shadow-md">
+            </div>
+
+            <h2 class="text-2xl font-bold text-stone-800 mb-2">Вы уже состоите в компании</h2>
+            <h3 class="text-xl text-amber-800 font-bold mb-6" th:text="${userCompany.name}">Название компании</h3>
+
+            <div class="space-y-4">
+                <a href="/dashboard" class="block w-full py-3 bg-stone-800 text-white rounded-xl font-bold hover:bg-stone-900 transition">
+                    Перейти в Dashboard
+                </a>
+                <a href="/companies/my" class="block w-full py-3 border border-stone-200 text-stone-600 rounded-xl font-bold hover:bg-stone-50 transition">
+                    Управление компанией
+                </a>
+            </div>
+        </div>
     </div>
+
+    <!-- БЛОК ВЫБОРА (ДЛЯ НОВИЧКОВ) -->
+    <div th:if="${userCompany == null}">
+
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-stone-800 mb-4">Партнеры системы</h1>
+            <p class="text-stone-500">Выберите компанию, к которой хотите присоединиться</p>
+        </div>
 
     <!-- ТОГГЛ -->
     <div class="flex flex-col items-center mb-12">

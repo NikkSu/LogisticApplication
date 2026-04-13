@@ -7,7 +7,7 @@ import com.logistics.suppliers.mapper.UserMapper;
 import com.logistics.suppliers.model.*;
 import com.logistics.suppliers.repository.CompanyRepository;
 import com.logistics.suppliers.repository.UserRepository;
-import com.logistics.suppliers.repository.companyRequestRepository;
+import com.logistics.suppliers.repository.CompanyRequestRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final companyRequestRepository requestRepository;
+    private final CompanyRequestRepository requestRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;

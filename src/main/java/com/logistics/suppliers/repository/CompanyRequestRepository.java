@@ -7,8 +7,10 @@ import com.logistics.suppliers.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-@Repository
-public interface companyRequestRepository extends JpaRepository<CompanyRequest, Long> {
+import java.util.List;
 
+@Repository
+public interface CompanyRequestRepository extends JpaRepository<CompanyRequest, Long> {
+    List<CompanyRequest> findByCompanyAndStatus(Company company, RequestStatus status);
     boolean existsByUserAndCompanyAndStatus(User user, Company company, RequestStatus status);
 }

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Профиль компании | Logistics Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #FDFBF7; }
+        .owner-badge { background-color: #8B4513; color: white; }
+    </style>
+</head>
+<body class="py-10">
+
+<div class="max-w-5xl mx-auto px-4">
+    <nav class="mb-8"><a href="/dashboard" class="text-stone-400 hover:text-stone-800 text-sm">← На главную</a></nav>
+
+    <!-- Шапка компании -->
+    <div class="bg-white p-8 rounded-3xl shadow-sm border border-stone-100 mb-8 flex items-center justify-between">
+        <div class="flex items-center space-x-6">
+            <div th:if="${company.logoUrl == null || company.logoUrl.isEmpty()}"
+                 class="w-20 h-20 rounded-2xl bg-stone-800 text-white flex items-center justify-center font-bold text-3xl"
+                 th:text="${company.name.substring(0,1)}"></div>
+            <img th:if="${company.logoUrl != null && !company.logoUrl.isEmpty()}"
+                 th:src="${company.logoUrl}" class="w-20 h-20 rounded-2xl object-cover">
+
+            <div>
+                <h1 class="text-3xl font-bold text-stone-800" th:text="${company.name}"></h1>
+                <p class="text-stone-500" th:text="${company.type == T(com.logistics.suppliers.model.CompanyType).SUPPLIER ? 'Поставщик товаров' : 'Заказчик'}"></p>
+            </div>
+        </div>
+        <div th:if="${isOwner}" class="owner-badge px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest">
+            Владелец
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+        <!-- Список сотрудников -->
+        <div class="md:col-span-2 space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-100">
+                <h2 class="text-xl font-bold text-stone-800 mb-4">Сотрудники</h2>
+                <div class="space-y-4">
+                    <div th:each="emp : ${employees}" class="flex items-center justify-between py-2 border-b border-stone-50 last:border-0">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center text-xs font-bold text-stone-500"
+                                 th:text="${emp.email.substring(0,1)}"></div>
+                            <span class="text-stone-700 font-medium" th:text="${emp.email}"></span>
+                        </div>
+                        <span class="text-[10px] px-2 py-1 rounded bg-stone-100 text-stone-500 font-bold uppercase" th:text="${emp.role}"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Управление заявками (только для владельца) -->
+        <div th:if="${isOwner}" class="space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-100">
+                <h2 class="text-xl font-bold text-stone-800 mb-4">Новые заявки</h2>
+                <p th:if="${requests.isEmpty()}" class="text-stone-400 text-sm italic">Заявок пока нет</p>
+
+                <div class="space-y-4">
+                    <div th:each="req : ${requests}" class="p-4 bg-stone-50 rounded-xl">
+                        <p class="text-sm font-bold text-stone-800 mb-3" th:text="${req.user.email}"></p>
+                        <div class="flex space-x-2">
+                            <form th:action="@{/companies/requests/{id}/approve(id=${req.id})}" method="post" class="flex-1">
+                                <button type="submit" class="w-full py-2 bg-green-600 text-white text-xs font-bold rounded-lg hover:bg-green-700 transition">Принять</button>
+                            </form>
+                            <form th:action="@{/companies/requests/{id}/reject(id=${req.id})}" method="post" class="flex-1">
+                                <button type="submit" class="w-full py-2 bg-stone-200 text-stone-600 text-xs font-bold rounded-lg hover:bg-stone-300 transition">Отказ</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

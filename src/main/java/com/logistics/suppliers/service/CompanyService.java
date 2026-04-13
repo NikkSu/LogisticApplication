@@ -2,7 +2,7 @@ package com.logistics.suppliers.service;
 
 import com.logistics.suppliers.model.*;
 import com.logistics.suppliers.repository.CompanyRepository;
-import com.logistics.suppliers.repository.companyRequestRepository;
+import com.logistics.suppliers.repository.CompanyRequestRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +12,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CompanyService {
     private final CompanyRepository companyRepository;
-    private final companyRequestRepository requestRepository;
+    private final CompanyRequestRepository requestRepository;
 
     public List<Company> getCompaniesByType(CompanyType type) {
         return companyRepository.findByType(type);
