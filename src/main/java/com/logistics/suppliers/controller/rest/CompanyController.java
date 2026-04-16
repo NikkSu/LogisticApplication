@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -21,6 +22,7 @@ public class CompanyController {
     private final CompanyService companyService;
     private final UserRepository userRepository;
     private final CompanyRequestRepository requestRepository;
+    private final CompanyRepository companyRepository;
 
     @GetMapping
     public String listCompanies(Model model, Authentication authentication) {
@@ -37,19 +39,21 @@ public class CompanyController {
     }
 
     @PostMapping("/join/{id}")
-    public String joinCompany(@PathVariable Long id, Authentication authentication) {
+    public String joinCompany(@PathVariable Long id,
+                              Authentication authentication,
+                              RedirectAttributes redirectAttributes) {
         User user = userRepository.findByEmail(authentication.getName()).get();
-
-        if (user.getCompany() != null) {
-            return "redirect:/companies?error=Вы уже состоите в компании " + user.getCompany().getName();
-        }
 
         try {
             companyService.createJoinRequest(user, id);
-            return "redirect:/companies?success=true";
+            redirectAttributes.addFlashAttribute("message", "Заявка успешно отправлена! Ожидайте подтверждения владельцем.");
+            redirectAttributes.addFlashAttribute("messageType", "success");
         } catch (Exception e) {
-            return "redirect:/companies?error=" + e.getMessage();
+            redirectAttributes.addFlashAttribute("message", "Ошибка: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("messageType", "error");
         }
+
+        return "redirect:/companies";
     }
 
     @GetMapping("/create")
@@ -86,21 +90,18 @@ public class CompanyController {
         User currentUser = userRepository.findByEmail(authentication.getName()).get();
         Company company = currentUser.getCompany();
 
-        if (company == null) {
-            return "redirect:/companies";
-        }
+        if (company == null) return "redirect:/companies";
 
         boolean isOwner = company.getOwner() != null && company.getOwner().getId().equals(currentUser.getId());
 
         model.addAttribute("company", company);
         model.addAttribute("isOwner", isOwner);
+        model.addAttribute("currentUser", currentUser); // Передаем текущего юзера для профиля
+
+        model.addAttribute("employees", userRepository.findByCompany(company));
 
         if (isOwner) {
-            List<CompanyRequest> requests = requestRepository.findByCompanyAndStatus(company, RequestStatus.CREATED);
-            model.addAttribute("requests", requests);
-
-            List<User> employees = userRepository.findByCompany(company);
-            model.addAttribute("employees", employees);
+            model.addAttribute("requests", requestRepository.findByCompanyAndStatus(company, RequestStatus.CREATED));
         }
 
         return "company-profile";
@@ -111,10 +112,8 @@ public class CompanyController {
         CompanyRequest request = requestRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Заявка не найдена"));
 
-        // Логика одобрения
         User user = request.getUser();
         user.setCompany(request.getCompany());
-        // Назначаем роль в зависимости от типа компании
         if (request.getCompany().getType() == CompanyType.SUPPLIER) {
             user.setRole(Role.SUPPLIER);
         } else {
@@ -139,5 +138,37 @@ public class CompanyController {
         return "redirect:/companies/my?rejected=true";
     }
 
+    @PostMapping("/leave")
+    public String leaveCompany(Authentication authentication, RedirectAttributes redirectAttributes) {
+        User user = userRepository.findByEmail(authentication.getName()).get();
+        try {
+            companyService.leaveCompany(user);
+            redirectAttributes.addFlashAttribute("message", "Вы успешно покинули компанию.");
+            redirectAttributes.addFlashAttribute("messageType", "success");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("message", e.getMessage());
+            redirectAttributes.addFlashAttribute("messageType", "error");
+        }
+        return "redirect:/companies";
+    }
 
+    @PostMapping("/transfer-ownership/{newOwnerId}")
+    public String transferOwnership(@PathVariable Long newOwnerId, Authentication authentication) {
+        User currentUser = userRepository.findByEmail(authentication.getName()).get();
+        Company company = currentUser.getCompany();
+
+        if (company.getOwner().getId().equals(currentUser.getId())) {
+            User newOwner = userRepository.findById(newOwnerId)
+                    .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+
+            if (!newOwner.getCompany().getId().equals(company.getId())) {
+                throw new RuntimeException("Пользователь должен быть сотрудником вашей компании");
+            }
+
+            company.setOwner(newOwner);
+            companyRepository.save(company);
+        }
+
+        return "redirect:/companies/my?transferred=true";
+    }
 }

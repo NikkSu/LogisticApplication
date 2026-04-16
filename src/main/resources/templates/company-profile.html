@@ -7,70 +7,112 @@
     <style>
         body { background-color: #FDFBF7; }
         .owner-badge { background-color: #8B4513; color: white; }
+        .member-badge { background-color: #D2B48C; color: #5D2E0B; }
     </style>
 </head>
 <body class="py-10">
 
-<div class="max-w-5xl mx-auto px-4">
-    <nav class="mb-8"><a href="/dashboard" class="text-stone-400 hover:text-stone-800 text-sm">← На главную</a></nav>
+<div class="max-w-6xl mx-auto px-4">
+    <div class="flex justify-between items-center mb-8">
+        <a href="/dashboard" class="text-stone-400 hover:text-stone-800 text-sm flex items-center">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            Назад на витрину
+        </a>
 
-    <!-- Шапка компании -->
-    <div class="bg-white p-8 rounded-3xl shadow-sm border border-stone-100 mb-8 flex items-center justify-between">
-        <div class="flex items-center space-x-6">
-            <div th:if="${company.logoUrl == null || company.logoUrl.isEmpty()}"
-                 class="w-20 h-20 rounded-2xl bg-stone-800 text-white flex items-center justify-center font-bold text-3xl"
-                 th:text="${company.name.substring(0,1)}"></div>
-            <img th:if="${company.logoUrl != null && !company.logoUrl.isEmpty()}"
-                 th:src="${company.logoUrl}" class="w-20 h-20 rounded-2xl object-cover">
-
-            <div>
-                <h1 class="text-3xl font-bold text-stone-800" th:text="${company.name}"></h1>
-                <p class="text-stone-500" th:text="${company.type == T(com.logistics.suppliers.model.CompanyType).SUPPLIER ? 'Поставщик товаров' : 'Заказчик'}"></p>
-            </div>
-        </div>
-        <div th:if="${isOwner}" class="owner-badge px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest">
-            Владелец
+        <div class="flex items-center space-x-4">
+            <span class="text-stone-500 text-sm" th:text="${currentUser.email}"></span>
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="text-red-600 font-bold text-sm hover:underline">Выйти</button>
+            </form>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <div class="bg-white p-8 rounded-3xl shadow-sm border border-stone-100 mb-8 flex items-center justify-between">
+        <div class="flex items-center space-x-6">
+            <div th:if="${company.logoUrl == null || company.logoUrl.isEmpty()}"
+                 class="w-16 h-16 rounded-2xl bg-stone-800 text-white flex items-center justify-center font-bold text-2xl uppercase"
+                 th:text="${company.name.substring(0,1)}"></div>
+            <img th:if="${company.logoUrl != null && !company.logoUrl.isEmpty()}"
+                 th:src="${company.logoUrl}" class="w-16 h-16 rounded-2xl object-cover">
 
-        <!-- Список сотрудников -->
-        <div class="md:col-span-2 space-y-6">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-100">
-                <h2 class="text-xl font-bold text-stone-800 mb-4">Сотрудники</h2>
-                <div class="space-y-4">
-                    <div th:each="emp : ${employees}" class="flex items-center justify-between py-2 border-b border-stone-50 last:border-0">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-8 h-8 rounded-full bg-stone-100 flex items-center justify-center text-xs font-bold text-stone-500"
-                                 th:text="${emp.email.substring(0,1)}"></div>
-                            <span class="text-stone-700 font-medium" th:text="${emp.email}"></span>
+            <div>
+                <h1 class="text-2xl font-bold text-stone-800" th:text="${company.name}"></h1>
+                <p class="text-stone-500 text-sm" th:text="${company.type == T(com.logistics.suppliers.model.CompanyType).SUPPLIER ? 'Поставщик товаров' : 'Компания-закупщик'}"></p>
+            </div>
+        </div>
+
+        <div th:class="${isOwner ? 'owner-badge' : 'member-badge'} + ' px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest'"
+             th:text="${isOwner ? 'Владелец' : 'Сотрудник'}">
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-stone-100">
+            <h2 class="text-xl font-bold text-stone-800 mb-6">Команда компании</h2>
+            <div class="space-y-4">
+                <div th:each="emp : ${employees}" class="flex items-center justify-between p-3 rounded-xl hover:bg-stone-50 transition">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-800 font-bold"
+                             th:text="${emp.email.substring(0,1).toUpperCase()}"></div>
+                        <div class="flex items-center space-x-2">
+                            <p class="text-stone-800 font-semibold" th:text="${emp.email}"></p>
+
+                            <div th:if="${company.owner != null && emp.id == company.owner.id}" class="relative group flex items-center">
+
+                                <svg class="w-5 h-5 text-amber-500 cursor-help" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"/>
+                                </svg>
+
+                                <div class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block w-max bg-stone-800 text-white text-[10px] px-2 py-1 rounded shadow-lg">
+                                    Владелец компании
+                                    <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-stone-800"></div>
+                                </div>
+
+                            </div>
                         </div>
-                        <span class="text-[10px] px-2 py-1 rounded bg-stone-100 text-stone-500 font-bold uppercase" th:text="${emp.role}"></span>
                     </div>
+                    <form th:if="${isOwner && emp.id != currentUser.id}"
+                          th:action="@{/companies/transfer-ownership/{id}(id=${emp.id})}" method="post">
+                        <button type="submit" class="text-[10px] bg-stone-100 text-stone-600 px-3 py-1.5 rounded-lg hover:bg-amber-100 hover:text-amber-900 transition font-bold">
+                            Передать права
+                        </button>
+                    </form>
+
+                    <span th:if="${emp.id == currentUser.id}" class="text-[10px] text-stone-300 italic">Это вы</span>
                 </div>
             </div>
         </div>
 
-        <!-- Управление заявками (только для владельца) -->
-        <div th:if="${isOwner}" class="space-y-6">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-100">
-                <h2 class="text-xl font-bold text-stone-800 mb-4">Новые заявки</h2>
-                <p th:if="${requests.isEmpty()}" class="text-stone-400 text-sm italic">Заявок пока нет</p>
+        <div class="space-y-6">
+            <div th:if="${isOwner}" class="bg-white p-6 rounded-2xl shadow-sm border border-stone-100">
+                <h2 class="text-xl font-bold text-stone-800 mb-4">Входящие заявки</h2>
+                <div th:if="${requests.isEmpty()}" class="text-center py-6">
+                    <p class="text-stone-400 text-sm">Новых заявок нет</p>
+                </div>
 
                 <div class="space-y-4">
-                    <div th:each="req : ${requests}" class="p-4 bg-stone-50 rounded-xl">
+                    <div th:each="req : ${requests}" class="p-4 border border-amber-100 bg-amber-50/30 rounded-2xl">
                         <p class="text-sm font-bold text-stone-800 mb-3" th:text="${req.user.email}"></p>
                         <div class="flex space-x-2">
                             <form th:action="@{/companies/requests/{id}/approve(id=${req.id})}" method="post" class="flex-1">
-                                <button type="submit" class="w-full py-2 bg-green-600 text-white text-xs font-bold rounded-lg hover:bg-green-700 transition">Принять</button>
+                                <button type="submit" class="w-full py-2 bg-stone-800 text-white text-[10px] font-bold rounded-lg hover:bg-black transition">Принять</button>
                             </form>
                             <form th:action="@{/companies/requests/{id}/reject(id=${req.id})}" method="post" class="flex-1">
-                                <button type="submit" class="w-full py-2 bg-stone-200 text-stone-600 text-xs font-bold rounded-lg hover:bg-stone-300 transition">Отказ</button>
+                                <button type="submit" class="w-full py-2 bg-white border border-stone-200 text-stone-500 text-[10px] font-bold rounded-lg hover:bg-stone-50 transition">Отказать</button>
                             </form>
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div class="bg-stone-800 p-6 rounded-2xl text-white">
+                <h3 class="font-bold mb-2">Статус компании</h3>
+                <p class="text-stone-400 text-xs mb-6">Ваша компания верифицирована и может участвовать в торгах.</p>
+
+                <a href="/companies" class="block w-full text-center py-3 bg-stone-700 rounded-xl text-sm font-bold hover:bg-stone-600 transition">
+                    К списку всех компаний
+                </a>
             </div>
         </div>
 

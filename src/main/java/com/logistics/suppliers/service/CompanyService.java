@@ -3,8 +3,10 @@ package com.logistics.suppliers.service;
 import com.logistics.suppliers.model.*;
 import com.logistics.suppliers.repository.CompanyRepository;
 import com.logistics.suppliers.repository.CompanyRequestRepository;
+import com.logistics.suppliers.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -13,6 +15,7 @@ import java.util.List;
 public class CompanyService {
     private final CompanyRepository companyRepository;
     private final CompanyRequestRepository requestRepository;
+    private final UserRepository userRepository;
 
     public List<Company> getCompaniesByType(CompanyType type) {
         return companyRepository.findByType(type);
@@ -33,5 +36,24 @@ public class CompanyService {
     }
     public Company saveCompany(Company company) {
         return companyRepository.save(company);
+    }
+
+    @Transactional
+    public void leaveCompany(User user) {
+        Company company = user.getCompany();
+        if (company == null) return;
+
+        if (company.getOwner() != null && company.getOwner().getId().equals(user.getId())) {
+            List<User> members = userRepository.findByCompany(company);
+            if (members.size() > 1) {
+                throw new RuntimeException("Вы владелец. Сначала передайте права другому сотруднику.");
+            }
+            company.setOwner(null);
+            companyRepository.save(company);
+        }
+
+        user.setCompany(null);
+        user.setRole(Role.MANAGER);
+        userRepository.save(user);
     }
 }

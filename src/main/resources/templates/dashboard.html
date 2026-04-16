@@ -19,7 +19,6 @@
     <div class="flex items-center space-x-8">
         <a href="/dashboard"><h1 class="text-2xl font-bold text-stone-800">Logistics<span class="text-amber-700">Hub</span></h1></a>
 
-        <!-- Ссылка на список компаний -->
         <a href="/companies" class="text-stone-600 hover:text-amber-800 font-medium text-sm">Компании</a>
 
         <form th:action="@{/dashboard}" method="get" class="relative">
@@ -34,7 +33,6 @@
             <p class="text-xs text-stone-400">Добро пожаловать,</p>
             <p class="font-semibold text-sm" th:text="${userEmail}">user@mail.com</p>
         </div>
-        <!-- Ссылка в личный кабинет компании -->
         <a href="/companies/my" class="p-2 hover:bg-stone-100 rounded-full transition" title="Моя компания">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
         </a>
@@ -62,7 +60,6 @@
                     <div class="h-48 bg-stone-100 relative cursor-pointer">
                         <img th:src="${product.imageUrl != null ? product.imageUrl : 'https://via.placeholder.com/300x200?text=No+Image'}" class="w-full h-full object-cover">
 
-                        <!-- УМНЫЙ ЛОГОТИП ПОСТАВЩИКА НА КАРТОЧКЕ -->
                         <div class="absolute top-2 left-2 flex items-center bg-white/90 backdrop-blur pr-2 rounded shadow-sm overflow-hidden">
                             <div th:if="${product.supplier.logoUrl == null || product.supplier.logoUrl.isEmpty()}"
                                  class="w-6 h-6 bg-amber-700 text-white text-[10px] flex items-center justify-center font-bold"
@@ -88,14 +85,11 @@
                 </div>
             </div>
         </div>
-
-        <!-- Сообщение если пусто -->
         <div th:if="${products.isEmpty()}" class="text-center py-20">
             <p class="text-stone-400 text-lg font-medium">По вашему запросу ничего не найдено :(</p>
             <a href="/dashboard" class="text-amber-700 underline mt-2 block">Сбросить все фильтры</a>
         </div>
 
-        <!-- Блок Пагинации -->
         <div th:if="${totalPages > 1}" class="mt-12 flex justify-center items-center space-x-4">
 
             <a th:if="${currentPage > 0}"
