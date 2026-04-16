@@ -1,5 +1,6 @@
 package com.logistics.suppliers.controller.rest;
 
+import com.logistics.suppliers.exceptions.ResourceNotFoundException;
 import com.logistics.suppliers.model.*;
 import com.logistics.suppliers.repository.CompanyRepository;
 import com.logistics.suppliers.repository.CompanyRequestRepository;
@@ -87,20 +88,22 @@ public class CompanyController {
     }
     @GetMapping("/my")
     public String myCompany(Model model, Authentication authentication) {
-        User currentUser = userRepository.findByEmail(authentication.getName()).get();
+        User currentUser = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
         Company company = currentUser.getCompany();
 
         if (company == null) return "redirect:/companies";
 
         boolean isOwner = company.getOwner() != null && company.getOwner().getId().equals(currentUser.getId());
+        boolean canManage = isOwner || currentUser.isCanManageEmployees();
 
         model.addAttribute("company", company);
+        model.addAttribute("currentUser", currentUser);
         model.addAttribute("isOwner", isOwner);
-        model.addAttribute("currentUser", currentUser); // Передаем текущего юзера для профиля
-
+        model.addAttribute("canManage", canManage);
         model.addAttribute("employees", userRepository.findByCompany(company));
 
-        if (isOwner) {
+        if (canManage) {
             model.addAttribute("requests", requestRepository.findByCompanyAndStatus(company, RequestStatus.CREATED));
         }
 
@@ -108,23 +111,37 @@ public class CompanyController {
     }
 
     @PostMapping("/requests/{id}/approve")
-    public String approveRequest(@PathVariable Long id, Authentication authentication) {
+    public String approveRequest(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         CompanyRequest request = requestRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Заявка не найдена"));
+                .orElseThrow(() -> new ResourceNotFoundException("Заявка не найдена"));
 
         User user = request.getUser();
-        user.setCompany(request.getCompany());
-        if (request.getCompany().getType() == CompanyType.SUPPLIER) {
-            user.setRole(Role.SUPPLIER);
-        } else {
-            user.setRole(Role.MANAGER);
+
+        if (user.getCompany() != null) {
+            request.setStatus(RequestStatus.REJECTED);
+            requestRepository.save(request);
+
+            redirectAttributes.addFlashAttribute("message", "Пользователь уже вступил в другую компанию. Заявка отклонена.");
+            redirectAttributes.addFlashAttribute("messageType", "error");
+            return "redirect:/companies/my";
         }
+
+        user.setCompany(request.getCompany());
+        user.setRole(request.getCompany().getType() == CompanyType.SUPPLIER ? Role.SUPPLIER : Role.MANAGER);
         userRepository.save(user);
 
         request.setStatus(RequestStatus.APPROVED);
         requestRepository.save(request);
 
-        return "redirect:/companies/my?approved=true";
+        List<CompanyRequest> otherRequests = requestRepository.findByUserAndStatus(user, RequestStatus.CREATED);
+        for (CompanyRequest other : otherRequests) {
+            other.setStatus(RequestStatus.REJECTED);
+        }
+        requestRepository.saveAll(otherRequests);
+
+        redirectAttributes.addFlashAttribute("message", "Сотрудник успешно принят!");
+        redirectAttributes.addFlashAttribute("messageType", "success");
+        return "redirect:/companies/my";
     }
 
     @PostMapping("/requests/{id}/reject")
@@ -170,5 +187,42 @@ public class CompanyController {
         }
 
         return "redirect:/companies/my?transferred=true";
+    }
+
+    @PostMapping("/employees/{id}/kick")
+    public String kickEmployee(@PathVariable Long id, Authentication authentication, RedirectAttributes redirectAttributes) {
+        User owner = userRepository.findByEmail(authentication.getName()).get();
+        User employee = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Сотрудник не найден"));
+
+        if (owner.getCompany().getOwner().getId().equals(owner.getId()) || owner.isCanManageEmployees()) {
+            if (employee.getId().equals(owner.getId())) {
+                redirectAttributes.addFlashAttribute("message", "Вы не можете уволить самого себя.");
+                redirectAttributes.addFlashAttribute("messageType", "error");
+                return "redirect:/companies/my";
+            }
+
+            employee.setCompany(null);
+            employee.setRole(Role.MANAGER);
+            userRepository.save(employee);
+
+            redirectAttributes.addFlashAttribute("message", "Сотрудник исключен из компании.");
+            redirectAttributes.addFlashAttribute("messageType", "success");
+        }
+
+        return "redirect:/companies/my";
+    }
+
+    @PostMapping("/employees/{id}/toggle-permission")
+    public String togglePermission(@PathVariable Long id, Authentication authentication) {
+        User currentUser = userRepository.findByEmail(authentication.getName()).get();
+        User targetUser = userRepository.findById(id).orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+
+        if (currentUser.getCompany().getOwner().getId().equals(currentUser.getId())) {
+            targetUser.setCanManageEmployees(!targetUser.isCanManageEmployees());
+            userRepository.save(targetUser);
+        }
+
+        return "redirect:/companies/my";
     }
 }

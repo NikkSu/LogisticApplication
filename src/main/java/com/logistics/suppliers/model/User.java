@@ -41,4 +41,9 @@ public class User {
     private String phone;
 
     private LocalDateTime lastLogin;
+
+    @Column(length = 400)
+    private String avatarUrl;
+
+    private boolean canManageEmployees = false;
 }

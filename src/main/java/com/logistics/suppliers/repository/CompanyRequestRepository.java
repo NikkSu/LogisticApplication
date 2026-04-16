@@ -13,4 +13,6 @@ import java.util.List;
 public interface CompanyRequestRepository extends JpaRepository<CompanyRequest, Long> {
     List<CompanyRequest> findByCompanyAndStatus(Company company, RequestStatus status);
     boolean existsByUserAndCompanyAndStatus(User user, Company company, RequestStatus status);
+
+    List<CompanyRequest> findByUserAndStatus(User user, RequestStatus requestStatus);
 }

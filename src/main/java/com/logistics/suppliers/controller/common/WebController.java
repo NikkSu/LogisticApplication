@@ -5,6 +5,8 @@ import com.logistics.suppliers.dto.LoginRequest;
 import com.logistics.suppliers.dto.RegisterRequest;
 import com.logistics.suppliers.model.CompanyType;
 import com.logistics.suppliers.model.Product;
+import com.logistics.suppliers.model.User;
+import com.logistics.suppliers.repository.UserRepository;
 import com.logistics.suppliers.service.AuthService;
 import com.logistics.suppliers.service.CompanyService;
 import com.logistics.suppliers.service.ProductService;
@@ -24,6 +26,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class WebController {
 
+    private final UserRepository userRepository;
     private final CompanyService companyService;
     private final ProductService productService;
     private final AuthService authService;
@@ -82,19 +85,18 @@ public class WebController {
                             @RequestParam(defaultValue = "0") int page,
                             Authentication authentication) {
 
-        int pageSize = 25;
-        Page<Product> productPage = productService.getFilteredProducts(search, category, page, pageSize);
+        User currentUser = userRepository.findByEmail(authentication.getName()).get();
+        model.addAttribute("currentUser", currentUser); // Теперь HTML видит компанию юзера
+
+        Page<Product> productPage = productService.getFilteredProducts(search, category, page, 25);
 
         model.addAttribute("products", productPage.getContent());
-        model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", productPage.getTotalPages());
+        model.addAttribute("currentPage", page);
         model.addAttribute("categories", productService.getAllCategories());
         model.addAttribute("searchQuery", search);
         model.addAttribute("selectedCategory", category);
-
-        if (authentication != null) {
-            model.addAttribute("userEmail", authentication.getName());
-        }
+        model.addAttribute("userEmail", currentUser.getEmail());
 
         return "dashboard";
     }
