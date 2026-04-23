@@ -17,7 +17,6 @@
 </head>
 <body class="pb-20">
 
-<!-- Навигация -->
 <nav class="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-stone-100 py-4 px-8 mb-8">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
         <a href="/dashboard" class="group flex items-center text-stone-500 hover:text-amber-800 transition">
@@ -31,7 +30,6 @@
 <div class="max-w-7xl mx-auto px-4">
     <div class="flex flex-col lg:flex-row gap-12">
 
-        <!-- ЛЕВАЯ КОЛОНКА: Изображение -->
         <div class="w-full lg:w-3/5">
             <div class="bg-white rounded-3xl p-4 border border-stone-100 shadow-sm overflow-hidden">
                 <img th:src="${product.imageUrl != null ? product.imageUrl : 'https://via.placeholder.com/800x600?text=No+Image'}"
@@ -39,10 +37,8 @@
             </div>
         </div>
 
-        <!-- ПРАВАЯ КОЛОНКА: Инфо и покупка -->
         <div class="w-full lg:w-2/5 space-y-8">
             <div class="buy-card space-y-6">
-                <!-- Категория и Название -->
                 <div>
                     <span class="bg-amber-50 text-amber-800 text-[10px] font-bold uppercase px-3 py-1 rounded-full"
                           th:text="${product.category != null ? product.category.name : 'Общее'}"></span>
@@ -58,7 +54,6 @@
                     </a>
                 </div>
 
-                <!-- Блок цены (как на Ozon) -->
                 <div class="bg-white p-8 rounded-3xl border border-stone-100 shadow-sm space-y-6">
                     <div class="flex items-baseline space-x-2">
                         <span class="text-5xl font-black price-tag" th:text="${#numbers.formatDecimal(product.price, 1, 2) + ' Б'}"></span>
@@ -74,7 +69,6 @@
                     </div>
                 </div>
 
-                <!-- Описание -->
                 <div class="space-y-4">
                     <h3 class="text-sm font-bold uppercase tracking-widest text-stone-400">Описание</h3>
                     <p class="text-stone-600 leading-relaxed text-sm bg-white p-6 rounded-2xl border border-stone-50"
@@ -85,7 +79,6 @@
             </div>
         </div>
     </div>
-    <!-- Блок аналитики цен с графиком -->
     <div class="mt-16 bg-white p-8 rounded-3xl border border-stone-100 shadow-sm">
         <div class="flex items-center justify-between mb-8">
             <div>
@@ -97,12 +90,10 @@
             </div>
         </div>
 
-        <!-- Контейнер для графика -->
         <div class="relative h-[300px] w-full">
             <canvas id="priceChart"></canvas>
         </div>
     </div>
-    <!-- БЛОК СРАВНЕНИЯ -->
     <div class="mt-24">
         <div class="flex items-end justify-between mb-10">
             <div>
