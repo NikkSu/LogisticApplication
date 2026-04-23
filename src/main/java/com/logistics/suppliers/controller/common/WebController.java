@@ -4,7 +4,11 @@ import com.logistics.suppliers.dto.AuthResponse;
 import com.logistics.suppliers.dto.LoginRequest;
 import com.logistics.suppliers.dto.RegisterRequest;
 import com.logistics.suppliers.model.CompanyType;
+import com.logistics.suppliers.model.PriceHistory;
 import com.logistics.suppliers.model.Product;
+import com.logistics.suppliers.model.User;
+import com.logistics.suppliers.repository.PriceHistoryRepository;
+import com.logistics.suppliers.repository.UserRepository;
 import com.logistics.suppliers.service.AuthService;
 import com.logistics.suppliers.service.CompanyService;
 import com.logistics.suppliers.service.ProductService;
@@ -24,9 +28,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class WebController {
 
+    private final UserRepository userRepository;
     private final CompanyService companyService;
     private final ProductService productService;
     private final AuthService authService;
+    private final PriceHistoryRepository priceHistoryRepository;
 
     @GetMapping("/register")
     public String registerForm(Model model) {
@@ -51,6 +57,34 @@ public class WebController {
             model.addAttribute("error", e.getMessage());
             return "register";
         }
+    }
+
+    @GetMapping("/product/{id}")
+    public String productDetail(@PathVariable Long id, Model model) {
+        Product product = productService.getProductById(id);
+        List<Product> similar = productService.getSimilarProducts(product);
+
+        List<PriceHistory> history = priceHistoryRepository.findByProductIdOrderByChangedAtAsc(id);
+
+        List<String> historyLabels = history.stream()
+                .map(h -> h.getChangedAt().getDayOfMonth() + " " + getMonthName(h.getChangedAt().getMonthValue()))
+                .toList();
+
+        List<java.math.BigDecimal> historyPrices = history.stream()
+                .map(PriceHistory::getPrice)
+                .toList();
+
+        model.addAttribute("product", product);
+        model.addAttribute("similarProducts", similar);
+        model.addAttribute("historyLabels", historyLabels);
+        model.addAttribute("historyPrices", historyPrices);
+
+        return "product-detail";
+    }
+
+    private String getMonthName(int month) {
+        String[] months = {"янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"};
+        return months[month - 1];
     }
 
     @GetMapping("/login")
@@ -82,31 +116,20 @@ public class WebController {
                             @RequestParam(defaultValue = "0") int page,
                             Authentication authentication) {
 
-        int pageSize = 25;
-        Page<Product> productPage = productService.getFilteredProducts(search, category, page, pageSize);
+        User currentUser = userRepository.findByEmail(authentication.getName()).get();
+        model.addAttribute("currentUser", currentUser); // Теперь HTML видит компанию юзера
+
+        Page<Product> productPage = productService.getFilteredProducts(search, category, page, 25);
 
         model.addAttribute("products", productPage.getContent());
-        model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", productPage.getTotalPages());
+        model.addAttribute("currentPage", page);
         model.addAttribute("categories", productService.getAllCategories());
         model.addAttribute("searchQuery", search);
         model.addAttribute("selectedCategory", category);
-
-        if (authentication != null) {
-            model.addAttribute("userEmail", authentication.getName());
-        }
+        model.addAttribute("userEmail", currentUser.getEmail());
 
         return "dashboard";
-    }
-
-    @GetMapping("/product/{id}")
-    public String productDetail(@PathVariable Long id, Model model) {
-        Product product = productService.getProductById(id);
-        List<Product> similar = productService.getSimilarProducts(product);
-
-        model.addAttribute("product", product);
-        model.addAttribute("similarProducts", similar);
-        return "product-detail";
     }
 
 }

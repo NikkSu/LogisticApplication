@@ -24,4 +24,8 @@ public class Company {
     private CompanyType type;
 
     private String logoUrl;
+
+    private String description;
+    private String address;
+    private String contactEmail;
 }

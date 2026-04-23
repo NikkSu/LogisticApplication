@@ -7,17 +7,19 @@ import com.logistics.suppliers.mapper.UserMapper;
 import com.logistics.suppliers.model.*;
 import com.logistics.suppliers.repository.CompanyRepository;
 import com.logistics.suppliers.repository.UserRepository;
-import com.logistics.suppliers.repository.companyRequestRepository;
+import com.logistics.suppliers.repository.CompanyRequestRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final companyRequestRepository requestRepository;
+    private final CompanyRequestRepository requestRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
@@ -52,13 +54,15 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest request) {
-
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid password");
+            throw new RuntimeException("Неверный пароль");
         }
+
+        user.setLastLogin(LocalDateTime.now());
+        userRepository.save(user);
 
         String token = jwtService.generateToken(user);
         return new AuthResponse(token);
