@@ -4,6 +4,7 @@ import com.logistics.suppliers.exceptions.ResourceNotFoundException;
 import com.logistics.suppliers.model.*;
 import com.logistics.suppliers.repository.CompanyRepository;
 import com.logistics.suppliers.repository.CompanyRequestRepository;
+import com.logistics.suppliers.repository.ProductRepository;
 import com.logistics.suppliers.service.CompanyService;
 import com.logistics.suppliers.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ public class CompanyController {
     private final UserRepository userRepository;
     private final CompanyRequestRepository requestRepository;
     private final CompanyRepository companyRepository;
+    private final ProductRepository productRepository;
 
     @GetMapping
     public String listCompanies(Model model, Authentication authentication) {
@@ -160,13 +162,25 @@ public class CompanyController {
         User user = userRepository.findByEmail(authentication.getName()).get();
         try {
             companyService.leaveCompany(user);
-            redirectAttributes.addFlashAttribute("message", "Вы успешно покинули компанию.");
+            redirectAttributes.addFlashAttribute("message", "Вы покинули компанию. Она была удалена, так как в ней не осталось участников.");
             redirectAttributes.addFlashAttribute("messageType", "success");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("message", e.getMessage());
             redirectAttributes.addFlashAttribute("messageType", "error");
         }
         return "redirect:/companies";
+    }
+
+    @GetMapping("/view/{id}")
+    public String viewCompany(@PathVariable Long id, Model model) {
+        Company company = companyRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Компания не найдена"));
+
+        List<Product> companyProducts = productRepository.findBySupplier(company);
+
+        model.addAttribute("company", company);
+        model.addAttribute("products", companyProducts);
+        return "company-view";
     }
 
     @PostMapping("/transfer-ownership/{newOwnerId}")

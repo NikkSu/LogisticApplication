@@ -3,6 +3,7 @@ package com.logistics.suppliers.service;
 import com.logistics.suppliers.model.*;
 import com.logistics.suppliers.repository.CompanyRepository;
 import com.logistics.suppliers.repository.CompanyRequestRepository;
+import com.logistics.suppliers.repository.ProductRepository;
 import com.logistics.suppliers.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ public class CompanyService {
     private final CompanyRepository companyRepository;
     private final CompanyRequestRepository requestRepository;
     private final UserRepository userRepository;
+    private final ProductRepository productRepository;
 
     public List<Company> getCompaniesByType(CompanyType type) {
         return companyRepository.findByType(type);
@@ -46,14 +48,26 @@ public class CompanyService {
         if (company.getOwner() != null && company.getOwner().getId().equals(user.getId())) {
             List<User> members = userRepository.findByCompany(company);
             if (members.size() > 1) {
-                throw new RuntimeException("Вы владелец. Сначала передайте права другому сотруднику.");
+                throw new RuntimeException("Вы владелец. Передайте права другому сотруднику перед уходом.");
             }
-            company.setOwner(null);
-            companyRepository.save(company);
         }
 
         user.setCompany(null);
         user.setRole(Role.MANAGER);
+        user.setCanManageEmployees(false);
         userRepository.save(user);
+
+        List<User> remainingMembers = userRepository.findByCompany(company);
+
+        if (remainingMembers.isEmpty()) {
+
+            List<Product> products = productRepository.findBySupplier(company);
+            productRepository.deleteAll(products);
+
+            List<CompanyRequest> requests = requestRepository.findByCompanyAndStatus(company, RequestStatus.CREATED);
+            requestRepository.deleteAll(requests);
+
+            companyRepository.delete(company);
+        }
     }
 }

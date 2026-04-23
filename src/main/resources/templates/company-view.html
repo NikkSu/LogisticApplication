@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${company.name} + ' | Профиль компании'"></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #FDFBF7; }
+        .map-container { height: 400px; border-radius: 24px; overflow: hidden; }
+    </style>
+</head>
+<body class="pb-20">
+
+<nav class="bg-white border-b py-4 px-8 mb-8 sticky top-0 z-50">
+    <a href="/dashboard" class="text-stone-500 hover:text-stone-800 flex items-center">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        Назад в каталог
+    </a>
+</nav>
+
+<div class="max-w-7xl mx-auto px-4">
+    <div class="bg-white rounded-3xl p-10 border border-stone-100 shadow-sm flex flex-col md:flex-row items-center md:items-start gap-10 mb-12">
+        <div th:if="${company.logoUrl == null || company.logoUrl.isEmpty()}"
+             class="w-32 h-32 rounded-3xl bg-stone-800 text-white flex items-center justify-center font-bold text-5xl uppercase"
+             th:text="${company.name.substring(0,1)}"></div>
+        <img th:if="${company.logoUrl != null && !company.logoUrl.isEmpty()}"
+             th:src="${company.logoUrl}" class="w-32 h-32 rounded-3xl object-cover shadow-lg">
+
+        <div class="flex-1 text-center md:text-left">
+            <h1 class="text-5xl font-black text-stone-900 mb-2" th:text="${company.name}"></h1>
+            <div class="flex flex-wrap justify-center md:justify-start gap-4 mb-6">
+                <span class="bg-amber-100 text-amber-800 px-4 py-1 rounded-full text-xs font-bold uppercase" th:text="${company.type}"></span>
+                <span class="text-stone-400 text-sm flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    <span th:text="${company.contactEmail}"></span>
+                </span>
+            </div>
+            <p class="text-stone-600 leading-relaxed max-w-2xl" th:text="${company.description}"></p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        <div class="lg:col-span-2">
+            <h2 class="text-2xl font-bold text-stone-800 mb-8">Товары поставщика</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div th:each="product : ${products}" class="bg-white p-4 rounded-2xl border border-stone-100 hover:shadow-lg transition group">
+                    <div class="h-40 bg-stone-50 rounded-xl mb-4 overflow-hidden">
+                        <img th:src="${product.imageUrl}" class="w-full h-full object-cover group-hover:scale-105 transition">
+                    </div>
+                    <h4 class="font-bold text-stone-800 mb-1" th:text="${product.name}"></h4>
+                    <div class="flex justify-between items-center mt-4">
+                        <span class="font-black text-stone-900" th:text="${product.price + ' ₽'}"></span>
+                        <a th:href="@{/product/{id}(id=${product.id})}" class="text-xs font-bold text-amber-800 bg-amber-50 px-3 py-1.5 rounded-lg hover:bg-amber-700 hover:text-white transition">Смотреть</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-8">
+            <div class="bg-white p-8 rounded-3xl border border-stone-100 shadow-sm">
+                <h3 class="font-bold text-stone-800 mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    Наш офис
+                </h3>
+                <p class="text-stone-500 text-sm mb-6" th:text="${company.address}"></p>
+
+                <div class="map-container border border-stone-100">
+                    <iframe th:src="'https://yandex.ru/map-widget/v1/?text=' + ${#strings.replace(company.address, ' ', '+')}"
+                            width="100%" height="100%" frameborder="0"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
