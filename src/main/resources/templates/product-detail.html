@@ -12,6 +12,14 @@
         .price-tag { color: #1c1917; }
         .btn-cart { background-color: #8B4513; transition: all 0.3s ease; }
         .btn-cart:hover { background-color: #5D2E0B; transform: scale(1.02); }
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
         .similar-card:hover { border-color: #D2B48C; box-shadow: 0 10px 30px rgba(139, 69, 19, 0.05); }
     </style>
 </head>
@@ -54,19 +62,38 @@
                     </a>
                 </div>
 
+                <!-- Блок цены и покупки -->
                 <div class="bg-white p-8 rounded-3xl border border-stone-100 shadow-sm space-y-6">
                     <div class="flex items-baseline space-x-2">
-                        <span class="text-5xl font-black price-tag" th:text="${#numbers.formatDecimal(product.price, 1, 2) + ' Б'}"></span>
+                        <span class="text-5xl font-black price-tag" th:text="${#numbers.formatDecimal(product.price, 1, 2) + ' ₽'}"></span>
                         <span class="text-stone-400 text-sm font-medium">/ за ед.</span>
                     </div>
 
-                    <div class="space-y-3">
-                        <button class="btn-cart w-full py-5 rounded-2xl text-white font-bold text-lg shadow-xl shadow-amber-900/20 flex items-center justify-center space-x-2">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                    <!-- ФОРМА ДОБАВЛЕНИЯ В КОРЗИНУ -->
+                    <form th:action="@{/cart/add/{id}(id=${product.id})}" method="post" class="space-y-4">
+
+                        <!-- Выбор количества -->
+                        <div class="flex items-center justify-between bg-stone-50 p-2 rounded-2xl border border-stone-100">
+                            <span class="ml-4 text-xs font-bold text-stone-400 uppercase tracking-widest">Количество</span>
+                            <div class="flex items-center">
+                                <input type="number" name="quantity" value="1" min="1"
+                                       class="w-20 bg-transparent border-none focus:ring-0 text-right font-black text-stone-900 text-lg"
+                                       required>
+                                <span class="mr-4 ml-2 text-stone-400 text-sm">шт.</span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-cart w-full py-5 rounded-2xl text-white font-bold text-lg shadow-xl shadow-amber-900/20 flex items-center justify-center space-x-2">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                            </svg>
                             <span>Добавить в корзину</span>
                         </button>
-                        <p class="text-[10px] text-center text-stone-400 uppercase font-bold tracking-tighter">Бесплатная доставка для партнеров</p>
-                    </div>
+
+                        <p class="text-[10px] text-center text-stone-400 uppercase font-bold tracking-tighter">
+                            Цена зафиксирована на момент добавления
+                        </p>
+                    </form>
                 </div>
 
                 <div class="space-y-4">

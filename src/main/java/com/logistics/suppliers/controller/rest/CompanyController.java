@@ -218,6 +218,7 @@ public class CompanyController {
 
             employee.setCompany(null);
             employee.setRole(Role.MANAGER);
+            employee.setCanManageEmployees(false);
             userRepository.save(employee);
 
             redirectAttributes.addFlashAttribute("message", "Сотрудник исключен из компании.");
