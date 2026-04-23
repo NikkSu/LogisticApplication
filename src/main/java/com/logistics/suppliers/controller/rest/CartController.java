@@ -1,6 +1,7 @@
 package com.logistics.suppliers.controller.rest;
 
 import com.logistics.suppliers.model.CartItem;
+import com.logistics.suppliers.model.Company;
 import com.logistics.suppliers.model.Product;
 import com.logistics.suppliers.model.User;
 import com.logistics.suppliers.repository.CartItemRepository;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/cart")
@@ -28,12 +31,13 @@ public class CartController {
     @GetMapping
     public String viewCart(Model model, Authentication authentication) {
         User user = userRepository.findByEmail(authentication.getName()).get();
-        if (user.getCompany() == null) return "redirect:/companies";
-
         List<CartItem> items = cartService.getCartForCompany(user.getCompany());
 
+        Map<Company, List<CartItem>> groupedItems = items.stream()
+                .collect(Collectors.groupingBy(item -> item.getProduct().getSupplier()));
+
+        model.addAttribute("groupedItems", groupedItems);
         model.addAttribute("items", items);
-        model.addAttribute("total", cartService.calculateTotal(items));
         return "cart";
     }
 

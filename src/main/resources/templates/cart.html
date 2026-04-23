@@ -4,101 +4,143 @@
     <meta charset="UTF-8">
     <title>Корзина | Logistics Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>body { background-color: #FDFBF7; }
-    input::-webkit-outer-spin-button,
-    input::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
-    input[type=number] {
-        -moz-appearance: textfield;
-    }
+    <style>
+        body { background-color: #FDFBF7; }
+        /* Убираем стрелочки у input type="number" */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
     </style>
 </head>
 <body class="py-10">
-<div class="max-w-5xl mx-auto px-4">
-    <nav class="mb-8"><a href="/dashboard" class="text-stone-400 hover:text-stone-800 text-sm">← Продолжить покупки</a></nav>
+<div class="max-w-6xl mx-auto px-4">
+    <nav class="mb-8"><a href="/dashboard" class="text-stone-400 hover:text-stone-800 text-sm flex items-center transition">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        Назад к покупкам
+    </a></nav>
 
-    <h1 class="text-3xl font-black text-stone-900 mb-10">Корзина закупки</h1>
+    <h1 class="text-4xl font-black text-stone-900 mb-10">Корзина компании</h1>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
 
-        <div class="lg:col-span-2 space-y-4">
-            <div th:each="item : ${items}" class="bg-white p-6 rounded-3xl border border-stone-100 flex items-center shadow-sm hover:border-amber-200 transition group">
+        <!-- ЛЕВАЯ КОЛОНКА: ТОВАРЫ С ГРУППИРОВКОЙ -->
+        <div class="lg:col-span-2">
 
-                <a th:href="@{/product/{id}(id=${item.product.id})}" class="flex-shrink-0">
-                    <img th:src="${item.product.imageUrl != null ? item.product.imageUrl : 'https://via.placeholder.com/150'}"
-                         class="w-20 h-20 rounded-2xl object-cover mr-6 bg-stone-50 group-hover:scale-105 transition">
-                </a>
-
-                <div class="flex-1">
-                    <a th:href="@{/product/{id}(id=${item.product.id})}" class="block">
-                        <h4 class="font-bold text-stone-800 hover:text-amber-800 transition" th:text="${item.product.name}"></h4>
-                    </a>
-
-                    <a th:href="@{/companies/view/{id}(id=${item.product.supplier.id})}" class="inline-block mt-1">
-                        <p class="text-[10px] text-stone-400 uppercase font-bold hover:text-stone-600 transition"
-                           th:text="${item.product.supplier.name}"></p>
-                    </a>
-                </div>
-
-                <div class="flex items-center space-x-8">
-                    <div class="text-right">
-                        <p class="font-black text-stone-900 text-lg"
-                           th:text="${#numbers.formatDecimal(item.product.price * item.quantity, 1, 2) + ' ₽'}"></p>
-                        <p class="text-[10px] text-stone-400 uppercase font-bold" th:text="${item.product.price + ' ₽ / шт.'}"></p>
-                    </div>
-
-                    <div class="flex items-center bg-stone-100 rounded-xl p-1 border border-stone-200">
-                        <form th:action="@{/cart/update/{id}(id=${item.id})}" method="post">
-                            <input type="hidden" name="quantity" th:value="${item.quantity - 1}">
-                            <button type="submit" class="w-8 h-8 flex items-center justify-center text-stone-600 hover:text-amber-800 font-bold transition">-</button>
-                        </form>
-
-                        <form th:action="@{/cart/update/{id}(id=${item.id})}" method="post" class="w-12">
-                            <input type="number" name="quantity" th:value="${item.quantity}"
-                                   onchange="this.form.submit()"
-                                   class="w-full bg-transparent border-none focus:ring-0 text-center font-bold text-stone-800 p-0">
-                        </form>
-
-                        <form th:action="@{/cart/update/{id}(id=${item.id})}" method="post">
-                            <input type="hidden" name="quantity" th:value="${item.quantity + 1}">
-                            <button type="submit" class="w-8 h-8 flex items-center justify-center text-stone-600 hover:text-amber-800 font-bold transition">+</button>
-                        </form>
-                    </div>
-
-                    <form th:action="@{/cart/remove/{id}(id=${item.id})}" method="post">
-                        <button type="submit" class="text-stone-300 hover:text-red-500 transition p-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                            </svg>
-                        </button>
-                    </form>
-                </div>
-                </div>
-
+            <!-- Заглушка если пусто -->
             <div th:if="${items.isEmpty()}" class="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-stone-200">
-                <p class="text-stone-400">Ваша корзина пуста</p>
-                <a href="/dashboard" class="text-amber-800 font-bold mt-4 inline-block hover:underline">Вернуться к покупкам</a>
+                <p class="text-stone-400 text-lg">Корзина пуста</p>
+                <a href="/dashboard" class="text-amber-800 font-bold mt-4 inline-block hover:underline">Перейти в каталог</a>
+            </div>
+
+            <!-- Группировка по поставщикам -->
+            <div th:each="entry : ${groupedItems}" class="mb-10">
+                <!-- Заголовок поставщика -->
+                <div class="flex items-center space-x-3 mb-4 bg-stone-100 p-4 rounded-2xl border border-stone-200">
+                    <span class="text-[10px] font-black uppercase text-stone-500 tracking-widest">Поставщик</span>
+                    <a th:href="@{/companies/view/{id}(id=${entry.key.id})}"
+                       class="font-bold text-stone-800 hover:text-amber-800 transition"
+                       th:text="${entry.key.name}"></a>
+                </div>
+
+                <div class="space-y-4">
+                    <div th:each="item : ${entry.value}" class="bg-white p-6 rounded-3xl border border-stone-100 flex items-center shadow-sm hover:border-amber-200 transition group">
+
+                        <!-- Картинка (ссылка) -->
+                        <a th:href="@{/product/{id}(id=${item.product.id})}" class="flex-shrink-0">
+                            <img th:src="${item.product.imageUrl != null ? item.product.imageUrl : 'https://via.placeholder.com/150'}"
+                                 class="w-24 h-24 rounded-2xl object-cover mr-6 bg-stone-50 group-hover:scale-105 transition">
+                        </a>
+
+                        <!-- Инфо -->
+                        <div class="flex-1 min-w-0">
+                            <a th:href="@{/product/{id}(id=${item.product.id})}" class="block">
+                                <h4 class="font-bold text-stone-800 hover:text-amber-800 transition truncate pr-4" th:text="${item.product.name}"></h4>
+                            </a>
+
+                            <!-- Добавил инфо: Кто из коллег добавил товар -->
+                            <p class="text-[10px] text-stone-400 mt-1">
+                                Добавил: <span class="font-bold" th:text="${item.addedBy.email}"></span>
+                            </p>
+
+                            <!-- ПРОВЕРКА ОСТАТКОВ -->
+                            <div th:if="${item.product.stockQuantity != null && item.product.stockQuantity < item.quantity}"
+                                 class="mt-2 inline-flex items-center px-2 py-1 rounded bg-red-50 text-red-600 text-[10px] font-bold uppercase tracking-tighter">
+                                <span class="mr-1">⚠</span> Недостаточно (в наличии: [[${item.product.stockQuantity}]])
+                            </div>
+                        </div>
+
+                        <!-- Цена и Управление -->
+                        <div class="flex items-center space-x-8">
+                            <div class="text-right whitespace-nowrap">
+                                <p class="font-black text-stone-900 text-lg"
+                                   th:text="${#numbers.formatDecimal(item.product.price * item.quantity, 1, 2) + ' ₽'}"></p>
+                                <p class="text-[10px] text-stone-400 uppercase font-bold" th:text="${item.product.price + ' ₽ / шт.'}"></p>
+                            </div>
+
+                            <!-- Переключатель кол-ва -->
+                            <div class="flex items-center bg-stone-100 rounded-xl p-1 border border-stone-200">
+                                <form th:action="@{/cart/update/{id}(id=${item.id})}" method="post">
+                                    <input type="hidden" name="quantity" th:value="${item.quantity - 1}">
+                                    <button type="submit" class="w-8 h-8 flex items-center justify-center text-stone-600 hover:text-amber-800 font-bold transition">-</button>
+                                </form>
+
+                                <form th:action="@{/cart/update/{id}(id=${item.id})}" method="post" class="w-12">
+                                    <input type="number" name="quantity" th:value="${item.quantity}"
+                                           onchange="this.form.submit()"
+                                           class="w-full bg-transparent border-none focus:ring-0 text-center font-bold text-stone-800 p-0">
+                                </form>
+
+                                <form th:action="@{/cart/update/{id}(id=${item.id})}" method="post">
+                                    <input type="hidden" name="quantity" th:value="${item.quantity + 1}">
+                                    <button type="submit" class="w-8 h-8 flex items-center justify-center text-stone-600 hover:text-amber-800 font-bold transition">+</button>
+                                </form>
+                            </div>
+
+                            <!-- Удалить -->
+                            <form th:action="@{/cart/remove/{id}(id=${item.id})}" method="post">
+                                <button type="submit" class="text-stone-300 hover:text-red-500 transition p-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
+        <!-- ПРАВАЯ КОЛОНКА: ИТОГО -->
         <div class="space-y-6">
-            <div class="bg-white p-8 rounded-3xl border border-stone-100 shadow-sm">
-                <h3 class="font-bold text-lg mb-6">Итого</h3>
-                <div class="flex justify-between mb-4">
-                    <span class="text-stone-400">Товары:</span>
-                    <span class="font-bold" th:text="${items.size()}"></span>
-                </div>
-                <div class="border-t border-stone-50 pt-4 flex justify-between items-end mb-8">
-                    <span class="text-stone-400">К оплате:</span>
-                    <span class="text-2xl font-black text-amber-900" th:text="${total + ' ₽'}"></span>
+            <div class="bg-white p-8 rounded-3xl border border-stone-100 shadow-sm sticky top-10">
+                <h3 class="font-bold text-xl mb-6">Детали заказа</h3>
+                <div class="space-y-4 mb-8">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-stone-400">Всего позиций:</span>
+                        <span class="font-bold" th:text="${items.size()}"></span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-stone-400">Поставщиков:</span>
+                        <span class="font-bold" th:text="${groupedItems.size()}"></span>
+                    </div>
+                    <div class="border-t border-stone-50 pt-4 flex justify-between items-end">
+                        <span class="text-stone-400 font-medium text-sm uppercase tracking-widest">Общий итог:</span>
+                        <span class="text-3xl font-black text-amber-900" th:text="${total + ' ₽'}"></span>
+                    </div>
                 </div>
 
                 <button th:disabled="${items.isEmpty()}"
-                        class="w-full py-4 bg-stone-900 text-white rounded-2xl font-bold hover:bg-black transition disabled:opacity-50">
+                        class="w-full py-5 bg-stone-900 text-white rounded-2xl font-bold text-lg hover:bg-black transition disabled:opacity-50 shadow-xl shadow-stone-200">
                     Оформить заказ
                 </button>
+                <p class="text-[10px] text-center text-stone-400 mt-4 uppercase font-bold tracking-tighter">
+                    Сумма будет разделена на [[${groupedItems.size()}]] отдельных счета
+                </p>
             </div>
         </div>
     </div>
