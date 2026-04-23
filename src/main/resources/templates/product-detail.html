@@ -62,17 +62,15 @@
                     </a>
                 </div>
 
-                <!-- Блок цены и покупки -->
                 <div class="bg-white p-8 rounded-3xl border border-stone-100 shadow-sm space-y-6">
                     <div class="flex items-baseline space-x-2">
                         <span class="text-5xl font-black price-tag" th:text="${#numbers.formatDecimal(product.price, 1, 2) + ' ₽'}"></span>
                         <span class="text-stone-400 text-sm font-medium">/ за ед.</span>
                     </div>
 
-                    <!-- ФОРМА ДОБАВЛЕНИЯ В КОРЗИНУ -->
-                    <form th:action="@{/cart/add/{id}(id=${product.id})}" method="post" class="space-y-4">
+                    <form th:if="${currentUser.company != null && currentUser.company.type.name() == 'CUSTOMER'}"
+                          th:action="@{/cart/add/{id}(id=${product.id})}" method="post" class="space-y-4">
 
-                        <!-- Выбор количества -->
                         <div class="flex items-center justify-between bg-stone-50 p-2 rounded-2xl border border-stone-100">
                             <span class="ml-4 text-xs font-bold text-stone-400 uppercase tracking-widest">Количество</span>
                             <div class="flex items-center">
@@ -89,11 +87,23 @@
                             </svg>
                             <span>Добавить в корзину</span>
                         </button>
-
-                        <p class="text-[10px] text-center text-stone-400 uppercase font-bold tracking-tighter">
-                            Цена зафиксирована на момент добавления
-                        </p>
                     </form>
+
+                    <div th:if="${currentUser.company != null && currentUser.company.type.name() == 'SUPPLIER'}"
+                         class="bg-amber-50 p-6 rounded-2xl border border-amber-100 text-center">
+                        <p class="text-amber-800 text-sm font-bold uppercase tracking-wider">Вы продавец</p>
+                        <p class="text-amber-600 text-[10px] mt-1 uppercase">Функция заказа доступна только покупателям</p>
+                    </div>
+
+                    <div th:if="${currentUser.company == null}"
+                         class="bg-stone-50 p-6 rounded-2xl border border-stone-200 text-center">
+                        <p class="text-stone-500 text-sm font-bold uppercase">Вступите в компанию</p>
+                        <a href="/companies" class="text-amber-800 text-xs font-bold underline mt-2 block">Выбрать компанию</a>
+                    </div>
+
+                    <p class="text-[10px] text-center text-stone-400 uppercase font-bold tracking-tighter">
+                        Цены указаны с учетом НДС (РБ)
+                    </p>
                 </div>
 
                 <div class="space-y-4">

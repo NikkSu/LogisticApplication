@@ -26,4 +26,9 @@ public class OrderItem {
 
     @NotNull
     private BigDecimal price;
+
+    public java.math.BigDecimal getRowTotal() {
+        if (this.price == null || this.quantity == null) return java.math.BigDecimal.ZERO;
+        return this.price.multiply(java.math.BigDecimal.valueOf(this.quantity));
+    }
 }

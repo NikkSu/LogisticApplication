@@ -60,9 +60,13 @@ public class WebController {
     }
 
     @GetMapping("/product/{id}")
-    public String productDetail(@PathVariable Long id, Model model) {
+    public String productDetail(@PathVariable Long id, Model model, Authentication auth) {
         Product product = productService.getProductById(id);
         List<Product> similar = productService.getSimilarProducts(product);
+
+        User user = userRepository.findByEmail(auth.getName()).get();
+        model.addAttribute("currentUser", user);
+        model.addAttribute("userEmail", user.getEmail());
 
         List<PriceHistory> history = priceHistoryRepository.findByProductIdOrderByChangedAtAsc(id);
 

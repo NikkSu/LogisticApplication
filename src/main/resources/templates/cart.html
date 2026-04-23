@@ -134,10 +134,12 @@
                     </div>
                 </div>
 
-                <button th:disabled="${items.isEmpty()}"
-                        class="w-full py-5 bg-stone-900 text-white rounded-2xl font-bold text-lg hover:bg-black transition disabled:opacity-50 shadow-xl shadow-stone-200">
-                    Оформить заказ
-                </button>
+                <form th:action="@{/orders/create}" method="post">
+                    <button type="submit" th:disabled="${items.isEmpty()}"
+                            class="w-full py-5 bg-stone-900 text-white rounded-2xl font-bold text-lg hover:bg-black transition disabled:opacity-50 shadow-xl shadow-stone-200">
+                        Оформить заказ
+                    </button>
+                </form>
                 <p class="text-[10px] text-center text-stone-400 mt-4 uppercase font-bold tracking-tighter">
                     Сумма будет разделена на [[${groupedItems.size()}]] отдельных счета
                 </p>

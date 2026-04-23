@@ -38,6 +38,7 @@ public class CartController {
 
         model.addAttribute("groupedItems", groupedItems);
         model.addAttribute("items", items);
+        model.addAttribute("total", cartService.calculateTotal(items));
         return "cart";
     }
 
