@@ -39,6 +39,7 @@ public class OrderService {
             order.setCustomerCompany(customerCompany);
             order.setSupplierCompany(supplier);
             order.setStatus(OrderStatus.CREATED);
+            order.setCreatedBy(user);
             order.setCreatedAt(LocalDateTime.now());
 
 

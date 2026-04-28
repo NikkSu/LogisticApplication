@@ -17,7 +17,36 @@
             Скачать счет (PDF)
         </a>
     </nav>
+    <div class="mb-8 flex flex-wrap gap-4 p-6 bg-stone-50 rounded-3xl border border-stone-100">
+        <div class="flex-1">
+            <p class="text-xs font-bold text-stone-400 uppercase mb-1">Управление заказом</p>
+            <p class="text-sm text-stone-600">Текущий статус: <span class="font-bold text-amber-800">[[${order.status}]]</span></p>
+        </div>
 
+        <div th:if="${currentUser.company.id == order.supplierCompany.id}" class="flex gap-2">
+            <form th:if="${order.status.name() == 'CREATED'}" th:action="@{/orders/{id}/status(id=${order.id})}" method="post">
+                <input type="hidden" name="newStatus" value="CONFIRMED">
+                <button class="bg-stone-800 text-white px-6 py-2 rounded-xl text-sm font-bold hover:bg-black transition">Принять в работу</button>
+            </form>
+
+            <form th:if="${order.status.name() == 'CONFIRMED'}" th:action="@{/orders/{id}/status(id=${order.id})}" method="post">
+                <input type="hidden" name="newStatus" value="SHIPPED">
+                <button class="bg-blue-600 text-white px-6 py-2 rounded-xl text-sm font-bold hover:bg-blue-700 transition">Отгрузить товар</button>
+            </form>
+        </div>
+
+        <div th:if="${currentUser.company.id == order.customerCompany.id}" class="flex gap-2">
+            <form th:if="${order.status.name() == 'SHIPPED'}" th:action="@{/orders/{id}/status(id=${order.id})}" method="post">
+                <input type="hidden" name="newStatus" value="DELIVERED">
+                <button class="bg-green-600 text-white px-6 py-2 rounded-xl text-sm font-bold hover:bg-green-700 transition">Подтвердить получение</button>
+            </form>
+
+            <form th:if="${order.status.name() == 'CREATED'}" th:action="@{/orders/{id}/status(id=${order.id})}" method="post">
+                <input type="hidden" name="newStatus" value="CANCELLED">
+                <button class="text-red-600 border border-red-100 px-6 py-2 rounded-xl text-sm font-bold hover:bg-red-50 transition">Отменить заказ</button>
+            </form>
+        </div>
+    </div>
     <div class="bg-white p-12 rounded-3xl shadow-sm border border-stone-100">
         <div class="flex justify-between border-b border-stone-100 pb-10 mb-10">
             <div>
@@ -29,7 +58,6 @@
             </div>
         </div>
 
-        <!-- Контрагенты -->
         <div class="grid grid-cols-2 gap-10 mb-10">
             <div>
                 <p class="text-[10px] font-black uppercase text-stone-400 mb-2">Заказчик</p>
@@ -59,7 +87,7 @@
                 </td>
                 <td class="py-6 text-stone-600" th:text="${item.price + ' Б'}"></td>
                 <td class="py-6 text-center text-stone-600" th:text="${item.quantity}"></td>
-                <td class="py-6 text-right font-bold text-stone-900" th:text="${item.price * item.quantity + ' ₽'}"></td>
+                <td class="py-6 text-right font-bold text-stone-900" th:text="${item.price * item.quantity + 'Б'}"></td>
             </tr>
             </tbody>
         </table>

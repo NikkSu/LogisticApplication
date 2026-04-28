@@ -3,13 +3,12 @@ package com.logistics.suppliers.controller.common;
 import com.logistics.suppliers.dto.AuthResponse;
 import com.logistics.suppliers.dto.LoginRequest;
 import com.logistics.suppliers.dto.RegisterRequest;
-import com.logistics.suppliers.model.CompanyType;
-import com.logistics.suppliers.model.PriceHistory;
-import com.logistics.suppliers.model.Product;
-import com.logistics.suppliers.model.User;
+import com.logistics.suppliers.model.*;
+import com.logistics.suppliers.repository.FavoriteRepository;
 import com.logistics.suppliers.repository.PriceHistoryRepository;
 import com.logistics.suppliers.repository.UserRepository;
 import com.logistics.suppliers.service.AuthService;
+import com.logistics.suppliers.service.CartService;
 import com.logistics.suppliers.service.CompanyService;
 import com.logistics.suppliers.service.ProductService;
 import jakarta.servlet.http.HttpSession;
@@ -33,6 +32,8 @@ public class WebController {
     private final ProductService productService;
     private final AuthService authService;
     private final PriceHistoryRepository priceHistoryRepository;
+    private final CartService cartService;
+    private final FavoriteRepository favoriteRepository;
 
     @GetMapping("/register")
     public String registerForm(Model model) {
@@ -67,7 +68,7 @@ public class WebController {
         User user = userRepository.findByEmail(auth.getName()).get();
         model.addAttribute("currentUser", user);
         model.addAttribute("userEmail", user.getEmail());
-
+        model.addAttribute("favoriteIds", favoriteRepository.findByUser(user).stream().map(f -> f.getProduct().getId()).toList());
         List<PriceHistory> history = priceHistoryRepository.findByProductIdOrderByChangedAtAsc(id);
 
         List<String> historyLabels = history.stream()
@@ -121,10 +122,19 @@ public class WebController {
                             Authentication authentication) {
 
         User currentUser = userRepository.findByEmail(authentication.getName()).get();
-        model.addAttribute("currentUser", currentUser); // Теперь HTML видит компанию юзера
+        model.addAttribute("currentUser", currentUser);
+
+        if (currentUser.getCompany() != null && currentUser.getCompany().getType() == CompanyType.CUSTOMER) {
+            List<CartItem> cartItems = cartService.getCartForCompany(currentUser.getCompany());
+            int cartSize = cartItems.stream().mapToInt(CartItem::getQuantity).sum();
+            model.addAttribute("cartSize", cartSize);
+        }
 
         Page<Product> productPage = productService.getFilteredProducts(search, category, page, 25);
 
+        List<Long> favoriteProductIds = favoriteRepository.findByUser(currentUser)
+                .stream().map(f -> f.getProduct().getId()).toList();
+        model.addAttribute("favoriteIds", favoriteProductIds);
         model.addAttribute("products", productPage.getContent());
         model.addAttribute("totalPages", productPage.getTotalPages());
         model.addAttribute("currentPage", page);

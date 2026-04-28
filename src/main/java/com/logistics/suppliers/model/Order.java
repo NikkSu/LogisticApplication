@@ -40,6 +40,8 @@ public class Order {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items = new ArrayList<>();
 
+    private LocalDateTime deliveredAt;
+
     public BigDecimal getTotalAmount() {
         if (items == null || items.isEmpty()) {
             return BigDecimal.ZERO;

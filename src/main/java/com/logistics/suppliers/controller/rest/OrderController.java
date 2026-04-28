@@ -70,18 +70,23 @@ public class OrderController {
     }
     @GetMapping("/view/{id}")
     public String viewOrder(@PathVariable Long id, Model model, Authentication authentication) {
+        User user = userRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Заказ не найден"));
 
         List<OrderItem> items = orderItemRepository.findByOrder(order);
 
-        BigDecimal total = items.stream()
-                .map(item -> item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        java.math.BigDecimal total = items.stream()
+                .map(item -> item.getPrice().multiply(java.math.BigDecimal.valueOf(item.getQuantity())))
+                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
 
         model.addAttribute("order", order);
         model.addAttribute("items", items);
         model.addAttribute("total", total);
+        model.addAttribute("currentUser", user);
+
         return "order-view";
     }
 
@@ -110,4 +115,20 @@ public class OrderController {
                 .body(pdfBytes);
     }
 
+
+    @PostMapping("/{id}/status")
+    public String updateOrderStatus(@PathVariable Long id,
+                                    @RequestParam OrderStatus newStatus,
+                                    Authentication authentication,
+                                    RedirectAttributes redirectAttributes) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Заказ не найден"));
+
+        order.setStatus(newStatus);
+
+        orderRepository.save(order);
+
+        redirectAttributes.addFlashAttribute("message", "Статус заказа #" + id + " обновлен на " + newStatus);
+        return "redirect:/orders/view/" + id;
+    }
 }

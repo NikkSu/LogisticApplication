@@ -109,26 +109,39 @@
                     </a>
                     <p class="text-xs text-stone-400 mb-3" th:text="${product.category != null ? product.category.name : 'Без категории'}"></p>
                     <div class="flex items-center justify-between mt-4">
-                        <span class="text-lg font-bold text-stone-900" th:text="${#numbers.formatDecimal(product.price, 1, 2) + ' Б'}"></span>
-                        <!-- Кнопка корзины видна только для компаний типа CUSTOMER -->
-                        <form th:if="${currentUser.company != null && currentUser.company.type.name() == 'CUSTOMER'}"
-                              th:action="@{/cart/add/{id}(id=${product.id})}" method="post">
-                            <button type="submit" class="btn-buy text-white p-2 rounded-lg shadow-md">
+                        <span class="text-lg font-black text-stone-900" th:text="${#numbers.formatDecimal(product.price, 1, 2) + ' Б'}"></span>
+
+                        <div class="flex items-center space-x-1">
+                            <form th:action="@{/favorites/toggle/{id}(id=${product.id})}" method="post">
+                                <button type="submit" class="p-2 rounded-xl hover:bg-stone-100 transition group/fav">
+                                    <svg th:if="${favoriteIds.contains(product.id)}" class="w-5 h-5 text-red-500 fill-current" viewBox="0 0 24 24">
+                                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                    </svg>
+                                    <svg th:unless="${favoriteIds.contains(product.id)}" class="w-5 h-5 text-stone-300 fill-none stroke-current group-hover/fav:text-red-400 transition" stroke-width="2" viewBox="0 0 24 24">
+                                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                    </svg>
+                                </button>
+                            </form>
+
+                            <form th:if="${currentUser.company != null && currentUser.company.type.name() == 'CUSTOMER'}"
+                                  th:action="@{/cart/add/{id}(id=${product.id})}" method="post">
+                                <button type="submit" class="btn-buy text-white p-2 rounded-xl shadow-md flex items-center justify-center">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                    </svg>
+                                </button>
+                            </form>
+
+                            <a th:if="${currentUser.company != null && currentUser.company.type.name() == 'SUPPLIER'}"
+                               th:href="@{/product/{id}(id=${product.id})}"
+                               class="p-2 text-stone-400 hover:text-amber-800 transition">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                    <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                                 </svg>
-                            </button>
-                        </form>
-                        <a th:if="${currentUser.company != null && currentUser.company.type.name() == 'SUPPLIER'}"
-                           th:href="@{/product/{id}(id=${product.id})}"
-                           class="p-2 text-stone-400 hover:text-amber-800 transition">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                            </svg>
-                        </a>
+                            </a>
+                        </div>
                     </div>
-                </div>
             </div>
         </div>
 
@@ -156,6 +169,26 @@
         </div>
     </main>
 </div>
+<a th:if="${cartSize != null && cartSize > 0}"
+   href="/cart"
+   class="fixed bottom-10 right-10 z-[100] group">
 
+    <div class="absolute inset-0 bg-amber-800 rounded-full animate-ping opacity-20 group-hover:opacity-40 transition-opacity"></div>
+
+    <div class="relative bg-stone-900 text-white p-5 rounded-full shadow-2xl transform transition-all duration-300 group-hover:scale-110 group-hover:bg-amber-800 flex items-center justify-center">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+        </svg>
+
+        <div class="absolute -top-1 -right-1 bg-amber-600 text-white text-[10px] font-black w-6 h-6 rounded-full flex items-center justify-center border-2 border-[#FDFBF7]"
+             th:text="${cartSize}">
+            0
+        </div>
+    </div>
+
+    <div class="absolute right-full mr-4 top-1/2 -translate-y-1/2 bg-stone-800 text-white text-xs py-2 px-4 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-lg">
+        Перейти к оформлению (<span class="text-amber-400">[[${cartSize}]]</span>)
+    </div>
+</a>
 </body>
 </html>
