@@ -42,6 +42,11 @@ public class OrderService {
             order.setCreatedBy(user);
             order.setCreatedAt(LocalDateTime.now());
 
+            java.math.BigDecimal total = itemsForThisSupplier.stream()
+                    .map(item -> item.getProduct().getPrice().multiply(java.math.BigDecimal.valueOf(item.getQuantity())))
+                    .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+
+            order.setTotalPrice(total);
 
             Order savedOrder = orderRepository.save(order);
 
@@ -51,7 +56,7 @@ public class OrderService {
                 orderItem.setProduct(cartItem.getProduct());
                 orderItem.setQuantity(cartItem.getQuantity());
                 orderItem.setPrice(cartItem.getProduct().getPrice());
-                
+
                 orderItemRepository.save(orderItem);
             }
         }

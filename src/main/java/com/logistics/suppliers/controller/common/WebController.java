@@ -123,6 +123,10 @@ public class WebController {
 
         User currentUser = userRepository.findByEmail(authentication.getName()).get();
         model.addAttribute("currentUser", currentUser);
+        Company company = currentUser.getCompany();
+
+        boolean isOwner = company != null && company.getOwner() != null &&
+                company.getOwner().getId().equals(currentUser.getId());
 
         if (currentUser.getCompany() != null && currentUser.getCompany().getType() == CompanyType.CUSTOMER) {
             List<CartItem> cartItems = cartService.getCartForCompany(currentUser.getCompany());
@@ -134,6 +138,8 @@ public class WebController {
 
         List<Long> favoriteProductIds = favoriteRepository.findByUser(currentUser)
                 .stream().map(f -> f.getProduct().getId()).toList();
+        model.addAttribute("isOwner", isOwner);
+        model.addAttribute("currentUser", currentUser);
         model.addAttribute("favoriteIds", favoriteProductIds);
         model.addAttribute("products", productPage.getContent());
         model.addAttribute("totalPages", productPage.getTotalPages());

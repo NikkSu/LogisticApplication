@@ -22,7 +22,6 @@ public class CartService {
             throw new RuntimeException("Вы должны состоять в компании для совершения покупок");
         }
 
-        // Ищем, есть ли уже этот товар в корзине КОМПАНИИ
         Optional<CartItem> existingItem = cartItemRepository.findByCompanyAndProduct(company, product);
 
         if (existingItem.isPresent()) {
@@ -31,8 +30,8 @@ public class CartService {
             cartItemRepository.save(item);
         } else {
             CartItem newItem = new CartItem();
-            newItem.setCompany(company); // Привязка к компании
-            newItem.setAddedBy(user);    // Запоминаем, кто добавил
+            newItem.setCompany(company);
+            newItem.setAddedBy(user);
             newItem.setProduct(product);
             newItem.setQuantity(quantity);
             cartItemRepository.save(newItem);
@@ -45,7 +44,12 @@ public class CartService {
 
     public BigDecimal calculateTotal(List<CartItem> items) {
         return items.stream()
-                .map(item -> item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+                .map(item -> {
+                    BigDecimal price = item.getProduct().getPrice();
+                    Integer qty = item.getQuantity();
+                    if (price == null || qty == null) return BigDecimal.ZERO;
+                    return price.multiply(BigDecimal.valueOf(qty));
+                })
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

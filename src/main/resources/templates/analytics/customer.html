@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Центр аналитики | Logistics Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background-color: #FDFBF7; }
+        /* Гарантируем, что контейнеры не схлопнутся */
+        .chart-container { position: relative; width: 100%; }
+    </style>
+</head>
+<body class="py-10">
+
+<div class="max-w-7xl mx-auto px-4 lg:px-8">
+    <!-- Навигация -->
+    <nav class="mb-10 flex justify-between items-center">
+        <a href="/dashboard" class="text-stone-400 hover:text-stone-800 text-sm flex items-center transition font-bold">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            Панель управления
+        </a>
+        <div class="bg-amber-100 text-amber-800 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.2em]">Модуль: Анализ и Прогнозирование</div>
+    </nav>
+
+    <!-- Сетка KPI -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+        <div class="bg-white p-6 rounded-[2rem] border border-stone-100 shadow-sm">
+            <p class="text-[10px] font-black text-stone-400 uppercase mb-2">Общие затраты</p>
+            <p class="text-3xl font-black text-stone-900">[[${totalSpend}]] <span class="text-amber-700 text-xl">Б</span></p>
+        </div>
+        <div class="bg-white p-6 rounded-[2rem] border border-stone-100 shadow-sm">
+            <p class="text-[10px] font-black text-stone-400 uppercase mb-2">Всего заказов</p>
+            <p class="text-3xl font-black text-stone-900">[[${totalOrders}]]</p>
+        </div>
+        <div class="bg-stone-900 p-6 rounded-[2rem] shadow-xl text-white">
+            <p class="text-[10px] font-black text-stone-500 uppercase mb-2">Прогноз закупки</p>
+            <p class="text-2xl font-black text-amber-500">[[${prediction}]]</p>
+        </div>
+        <div class="bg-white p-6 rounded-[2rem] border border-stone-100 shadow-sm">
+            <p class="text-[10px] font-black text-stone-400 uppercase mb-2">Активных сделок</p>
+            <p class="text-3xl font-black text-stone-900">[[${activeOrders}]]</p>
+        </div>
+    </div>
+
+    <!-- Основные графики -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <!-- 1. Динамика трат -->
+        <div class="bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm">
+            <h3 class="text-lg font-black mb-6">Динамика расходов по месяцам</h3>
+            <div class="chart-container h-[300px]"> <!-- ФИКСИРОВАННАЯ ВЫСОТА -->
+                <canvas id="monthlyChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 2. Категории -->
+        <div class="bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm">
+            <h3 class="text-lg font-black mb-6">Распределение по категориям</h3>
+            <div class="chart-container h-[300px]"> <!-- ФИКСИРОВАННАЯ ВЫСОТА -->
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- 3. Топ товаров -->
+        <div class="lg:col-span-2 bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm">
+            <h3 class="text-lg font-black mb-6">Топ закупаемых товаров (ABC-анализ)</h3>
+            <div class="chart-container h-[400px]"> <!-- ФИКСИРОВАННАЯ ВЫСОТА -->
+                <canvas id="abcChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 4. Таблица надежности -->
+        <div class="bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm">
+            <h3 class="text-lg font-black mb-6">Скорость поставки</h3>
+            <div class="space-y-6">
+                <div th:each="entry : ${reliabilityData}" class="flex justify-between items-center">
+                    <div>
+                        <p class="font-bold text-stone-800 text-sm" th:text="${entry.key}"></p>
+                        <p class="text-[10px] text-stone-400 uppercase font-bold tracking-tight">Среднее время ожидания</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-lg font-black text-amber-700" th:text="${#numbers.formatDecimal(entry.value, 1, 1)}"></span>
+                        <span class="text-[10px] font-bold text-stone-400 uppercase ml-1">дн.</span>
+                    </div>
+                </div>
+                <div th:if="${#maps.isEmpty(reliabilityData)}" class="text-center py-10 text-stone-400 italic text-sm">
+                    Недостаточно данных для расчета
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    // Настройки по умолчанию для всех графиков
+    Chart.defaults.font.family = 'Inter, sans-serif';
+    Chart.defaults.color = '#a8a29e';
+
+    // 1. График расходов
+    const monthlyData = [[${monthlyStats}]];
+    if (monthlyData && Object.keys(monthlyData).length > 0) {
+        new Chart(document.getElementById('monthlyChart'), {
+            type: 'line',
+            data: {
+                labels: Object.keys(monthlyData),
+                datasets: [{
+                    label: 'Траты',
+                    data: Object.values(monthlyData),
+                    borderColor: '#8B4513',
+                    backgroundColor: 'rgba(139, 69, 19, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    }
+
+    // 2. График категорий
+    const categoryData = [[${categoryStats}]];
+    if (categoryData && Object.keys(categoryData).length > 0) {
+        new Chart(document.getElementById('categoryChart'), {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(categoryData),
+                datasets: [{
+                    data: Object.values(categoryData),
+                    backgroundColor: ['#1c1917', '#8b4513', '#d97706', '#f59e0b', '#e7e5e4']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+    }
+
+    // 3. ABC Анализ
+    const abcData = [[${abcData}]];
+    if (abcData && Object.keys(abcData).length > 0) {
+        new Chart(document.getElementById('abcChart'), {
+            type: 'bar',
+            data: {
+                labels: Object.keys(abcData),
+                datasets: [{
+                    label: 'Сумма закупки',
+                    data: Object.values(abcData),
+                    backgroundColor: '#d97706',
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    }
+</script>
+</body>
+</html>

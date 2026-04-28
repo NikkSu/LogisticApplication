@@ -205,21 +205,37 @@ public class CompanyController {
 
     @PostMapping("/employees/{id}/kick")
     public String kickEmployee(@PathVariable Long id, Authentication authentication, RedirectAttributes redirectAttributes) {
-        User owner = userRepository.findByEmail(authentication.getName()).get();
-        User employee = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Сотрудник не найден"));
+        User currentUser = userRepository.findByEmail(authentication.getName()).get();
+        User targetEmployee = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Сотрудник не найден"));
+        Company company = currentUser.getCompany();
 
-        if (owner.getCompany().getOwner().getId().equals(owner.getId()) || owner.isCanManageEmployees()) {
-            if (employee.getId().equals(owner.getId())) {
-                redirectAttributes.addFlashAttribute("message", "Вы не можете уволить самого себя.");
+        boolean isOwner = company.getOwner().getId().equals(currentUser.getId());
+        boolean canManage = currentUser.isCanManageEmployees();
+
+        if (isOwner || canManage) {
+            if (targetEmployee.getId().equals(currentUser.getId())) {
+                redirectAttributes.addFlashAttribute("message", "Вы не можете исключить себя.");
                 redirectAttributes.addFlashAttribute("messageType", "error");
                 return "redirect:/companies/my";
             }
 
-            employee.setCompany(null);
-            employee.setRole(Role.MANAGER);
-            employee.setCanManageEmployees(false);
-            userRepository.save(employee);
+            if (!isOwner && targetEmployee.getId().equals(company.getOwner().getId())) {
+                redirectAttributes.addFlashAttribute("message", "У вас нет прав исключать владельца.");
+                redirectAttributes.addFlashAttribute("messageType", "error");
+                return "redirect:/companies/my";
+            }
+
+            if (!isOwner && targetEmployee.isCanManageEmployees()) {
+                redirectAttributes.addFlashAttribute("message", "Вы не можете исключать других администраторов.");
+                redirectAttributes.addFlashAttribute("messageType", "error");
+                return "redirect:/companies/my";
+            }
+
+            targetEmployee.setCompany(null);
+            targetEmployee.setRole(Role.MANAGER);
+            targetEmployee.setCanManageEmployees(false);
+            userRepository.save(targetEmployee);
 
             redirectAttributes.addFlashAttribute("message", "Сотрудник исключен из компании.");
             redirectAttributes.addFlashAttribute("messageType", "success");
@@ -236,6 +252,31 @@ public class CompanyController {
         if (currentUser.getCompany().getOwner().getId().equals(currentUser.getId())) {
             targetUser.setCanManageEmployees(!targetUser.isCanManageEmployees());
             userRepository.save(targetUser);
+        }
+
+        return "redirect:/companies/my";
+    }
+
+    @PostMapping("/employees/{id}/change-role")
+    public String changeEmployeeRole(@PathVariable Long id,
+                                     @RequestParam Role newRole,
+                                     Authentication authentication,
+                                     RedirectAttributes redirectAttributes) {
+        User currentUser = userRepository.findByEmail(authentication.getName()).get();
+        User targetEmployee = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Сотрудник не найден"));
+
+        if (currentUser.getCompany().getOwner().getId().equals(currentUser.getId())) {
+
+            if (targetEmployee.getId().equals(currentUser.getId())) {
+                return "redirect:/companies/my";
+            }
+
+            targetEmployee.setRole(newRole);
+            userRepository.save(targetEmployee);
+
+            redirectAttributes.addFlashAttribute("message", "Роль сотрудника успешно изменена на " + newRole);
+            redirectAttributes.addFlashAttribute("messageType", "success");
         }
 
         return "redirect:/companies/my";

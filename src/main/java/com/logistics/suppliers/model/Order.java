@@ -42,6 +42,8 @@ public class Order {
 
     private LocalDateTime deliveredAt;
 
+    private BigDecimal totalPrice;
+
     public BigDecimal getTotalAmount() {
         if (items == null || items.isEmpty()) {
             return BigDecimal.ZERO;

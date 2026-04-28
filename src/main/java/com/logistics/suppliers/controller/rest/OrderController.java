@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -125,7 +126,11 @@ public class OrderController {
                 .orElseThrow(() -> new RuntimeException("Заказ не найден"));
 
         order.setStatus(newStatus);
-
+        order.setUpdatedAt(LocalDateTime.now());
+        if (newStatus == OrderStatus.DELIVERED) {
+            order.setDeliveredAt(LocalDateTime.now());
+            order.setActualDeliveryDate(LocalDateTime.now());
+        }
         orderRepository.save(order);
 
         redirectAttributes.addFlashAttribute("message", "Статус заказа #" + id + " обновлен на " + newStatus);
