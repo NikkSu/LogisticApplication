@@ -3,6 +3,8 @@ package com.logistics.suppliers.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -28,4 +30,5 @@ public class Company {
     private String description;
     private String address;
     private String contactEmail;
+    private BigDecimal monthlyBudget;
 }

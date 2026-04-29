@@ -63,14 +63,22 @@ public class AnalyticsService {
     }
 
     public String predictNextOrderDate(Company company) {
-        List<Order> orders = getDeliveredOrders(company);
+        List<Order> orders = orderRepository.findByCustomerCompanyAndStatus(company, OrderStatus.DELIVERED);
 
-        if (orders.size() < 2) {
-            return "Нужно больше данных";
+        if (orders.size() < 3) return "Нужно минимум 3 выполненных заказа";
+
+        List<Long> intervals = new java.util.ArrayList<>();
+        for (int i = 1; i < orders.size(); i++) {
+            long days = java.time.Duration.between(orders.get(i-1).getCreatedAt(), orders.get(i).getCreatedAt()).toDays();
+            intervals.add(Math.abs(days));
         }
 
+        double averageInterval = intervals.stream().mapToLong(Long::longValue).average().orElse(0);
+
         LocalDateTime lastOrderDate = orders.get(orders.size() - 1).getCreatedAt();
-        return lastOrderDate.plusDays(14).format(DateTimeFormatter.ofPattern("dd MMMM yyyy", new Locale("ru")));
+        LocalDateTime predictedDate = lastOrderDate.plusDays((long) averageInterval);
+
+        return predictedDate.format(DateTimeFormatter.ofPattern("dd MMMM yyyy", new Locale("ru")));
     }
 
     private List<Order> getDeliveredOrders(Company company) {
@@ -157,6 +165,24 @@ public class AnalyticsService {
                         item -> item.getProduct().getName(),
                         Collectors.summingLong(OrderItem::getQuantity)
                 ));
+    }
+
+    public BigDecimal getSpentThisMonth(Company company) {
+        LocalDateTime startOfMonth = LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0);
+
+        return orderRepository.findByCustomerCompanyAndStatus(company, OrderStatus.DELIVERED).stream()
+                .filter(o -> o.getCreatedAt().isAfter(startOfMonth))
+                .map(Order::getTotalPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public double getBudgetUsagePercentage(Company company) {
+        if (company.getMonthlyBudget() == null || company.getMonthlyBudget().compareTo(BigDecimal.ZERO) == 0) {
+            return 0;
+        }
+        BigDecimal spent = getSpentThisMonth(company);
+        return spent.divide(company.getMonthlyBudget(), 2, java.math.RoundingMode.HALF_UP)
+                .multiply(BigDecimal.valueOf(100)).doubleValue();
     }
 
 }

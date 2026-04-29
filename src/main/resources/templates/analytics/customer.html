@@ -7,7 +7,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { background-color: #FDFBF7; }
-        /* Гарантируем, что контейнеры не схлопнутся */
         .chart-container { position: relative; width: 100%; }
     </style>
 </head>
@@ -20,26 +19,76 @@
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
             Панель управления
         </a>
+        <div class="flex items-center space-x-4">
+            <!-- Кнопка EXCEL -->
+            <a href="/analytics/export" class="flex items-center bg-white border border-stone-200 text-stone-600 px-6 py-2 rounded-xl text-sm font-bold hover:bg-stone-50 transition shadow-sm">
+                <svg class="w-4 h-4 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Экспорт в Excel
+            </a>
+        </div>
         <div class="bg-amber-100 text-amber-800 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.2em]">Модуль: Анализ и Прогнозирование</div>
     </nav>
 
     <!-- Сетка KPI -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
-        <div class="bg-white p-6 rounded-[2rem] border border-stone-100 shadow-sm">
-            <p class="text-[10px] font-black text-stone-400 uppercase mb-2">Общие затраты</p>
-            <p class="text-3xl font-black text-stone-900">[[${totalSpend}]] <span class="text-amber-700 text-xl">Б</span></p>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+        <!-- 1. Всего потрачено -->
+        <div class="bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm flex flex-col justify-between">
+            <p class="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-4">Инвестировано всего</p>
+            <p class="text-4xl font-black text-stone-900">[[${totalSpend != null ? totalSpend : 0}]] <span class="text-amber-700 text-2xl">Б</span></p>
         </div>
-        <div class="bg-white p-6 rounded-[2rem] border border-stone-100 shadow-sm">
-            <p class="text-[10px] font-black text-stone-400 uppercase mb-2">Всего заказов</p>
-            <p class="text-3xl font-black text-stone-900">[[${totalOrders}]]</p>
+
+        <!-- 2. Прогноз (Центральный акцент) -->
+        <div class="bg-stone-900 text-white p-8 rounded-[2.5rem] shadow-xl relative overflow-hidden flex flex-col justify-between">
+            <div>
+                <p class="text-[10px] font-black text-stone-500 uppercase tracking-widest mb-4">Прогноз следующей закупки</p>
+                <p class="text-3xl font-black text-amber-500">[[${prediction}]]</p>
+            </div>
+            <p class="text-[10px] text-stone-400 mt-4 uppercase">AI Анализ частоты заказов</p>
+            <div class="absolute -right-4 -bottom-4 text-white/5 text-8xl font-black italic">PREDICT</div>
         </div>
-        <div class="bg-stone-900 p-6 rounded-[2rem] shadow-xl text-white">
-            <p class="text-[10px] font-black text-stone-500 uppercase mb-2">Прогноз закупки</p>
-            <p class="text-2xl font-black text-amber-500">[[${prediction}]]</p>
+
+        <!-- 3. Активные сделки -->
+        <div class="bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm flex flex-col justify-between">
+            <p class="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-4">Активных сделок</p>
+            <p class="text-4xl font-black text-stone-900">[[${activeOrders}]]</p>
         </div>
-        <div class="bg-white p-6 rounded-[2rem] border border-stone-100 shadow-sm">
-            <p class="text-[10px] font-black text-stone-400 uppercase mb-2">Активных сделок</p>
-            <p class="text-3xl font-black text-stone-900">[[${activeOrders}]]</p>
+    </div>
+
+    <!-- БЛОК БЮДЖЕТА (Растянутый на всю ширину) -->
+    <div class="bg-white p-10 rounded-[3rem] border border-stone-100 shadow-sm mb-12">
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h3 class="text-2xl font-black text-stone-900">Контроль бюджета</h3>
+                <p class="text-stone-400 text-sm">Лимит расходов на текущий месяц</p>
+            </div>
+            <button onclick="document.getElementById('budget-modal').classList.remove('hidden')"
+                    class="bg-stone-100 hover:bg-stone-200 text-stone-600 px-6 py-2 rounded-xl text-xs font-black uppercase transition">
+                Изменить лимит
+            </button>
+        </div>
+
+        <!-- Шкала прогресса -->
+        <div class="w-full bg-stone-50 h-6 rounded-2xl overflow-hidden mb-6 border border-stone-100 p-1">
+            <div class="bg-gradient-to-r from-amber-700 to-amber-500 h-full rounded-xl transition-all duration-1000 shadow-inner"
+                 th:style="'width: ' + ${budgetUsage > 100 ? 100 : budgetUsage} + '%'"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
+            <div class="border-r border-stone-50">
+                <p class="text-3xl font-black text-stone-900" th:text="${spentThisMonth != null ? spentThisMonth : 0} + ' Б'"></p>
+                <p class="text-[10px] text-stone-400 font-bold uppercase tracking-tighter">Освоено в [[${#temporals.format(#temporals.createNow(), 'MMMM')}]]</p>
+            </div>
+            <div class="border-r border-stone-50">
+                <p class="text-3xl font-black text-stone-400" th:text="${company.monthlyBudget != null ? company.monthlyBudget : 0} + ' Б'"></p>
+                <p class="text-[10px] text-stone-400 font-bold uppercase tracking-tighter">Установленный лимит</p>
+            </div>
+            <div>
+                <p th:class="${budgetUsage > 90 ? 'text-red-600' : 'text-amber-700'} + ' text-3xl font-black'"
+                   th:text="${budgetUsage} + '%'"></p>
+                <p class="text-[10px] text-stone-400 font-bold uppercase tracking-tighter">Использование бюджета</p>
+            </div>
         </div>
     </div>
 

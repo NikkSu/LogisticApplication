@@ -28,7 +28,7 @@
         <div class="flex items-center space-x-4 flex-shrink-0">
             <a href="/companies" class="text-stone-600 hover:text-amber-800 font-medium text-sm">Компании</a>
 
-            <a th:if="${currentUser.company != null && currentUser.company.type.name() == 'SUPPLIER'}"
+            <a th:if="${currentUser.company != null && currentUser.company.type.name() == 'CUSTOMER' && currentUser.role.name() == 'MANAGER'}"
                href="/my-products"
                class="text-amber-800 font-bold text-sm bg-amber-50 px-3 py-1 rounded-lg hover:bg-amber-100 transition">
                 Мои товары
@@ -49,7 +49,7 @@
             <svg class="w-5 h-5 text-stone-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
         </form>
 
-        <a th:if="${currentUser.company != null && currentUser.company.type.name() == 'CUSTOMER'}"
+        <a th:if="${currentUser.company != null && currentUser.company.type.name() == 'CUSTOMER' && currentUser.role.name() == 'MANAGER'}"
            href="/cart" class="relative p-2 text-stone-600 hover:bg-stone-100 rounded-full transition flex-shrink-0">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
             <span th:if="${cartSize > 0}" class="absolute top-0 right-0 bg-amber-600 text-white text-[8px] w-4 h-4 rounded-full flex items-center justify-center border border-white" th:text="${cartSize}"></span>
@@ -127,16 +127,16 @@
                                 </button>
                             </form>
 
-                            <form th:if="${currentUser.company != null && currentUser.company.type.name() == 'CUSTOMER'}"
+                            <!-- 1. Кнопка КОРЗИНЫ (Только для Менеджера) -->
+                            <form th:if="${currentUser.company != null && currentUser.company.type.name() == 'CUSTOMER' && currentUser.role.name() == 'MANAGER'}"
                                   th:action="@{/cart/add/{id}(id=${product.id})}" method="post">
                                 <button type="submit" class="btn-buy text-white p-2 rounded-xl shadow-md flex items-center justify-center">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                    </svg>
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                                 </button>
                             </form>
 
-                            <a th:if="${currentUser.company != null && currentUser.company.type.name() == 'SUPPLIER'}"
+                            <!-- 2. Иконка ГЛАЗА (Только для Аналитика или Поставщика), чтобы заменять кнопку корзины визуально -->
+                            <a th:if="${currentUser.company != null && (currentUser.role.name() == 'ANALYST' || currentUser.company.type.name() == 'SUPPLIER')}"
                                th:href="@{/product/{id}(id=${product.id})}"
                                class="p-2 text-stone-400 hover:text-amber-800 transition">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -173,7 +173,7 @@
         </div>
     </main>
 </div>
-<a th:if="${cartSize != null && cartSize > 0}"
+<a th:if="${cartSize != null && cartSize > 0 && currentUser.role.name() == 'MANAGER'}"
    href="/cart"
    class="fixed bottom-10 right-10 z-[100] group">
 

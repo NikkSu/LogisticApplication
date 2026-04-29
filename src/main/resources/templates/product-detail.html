@@ -74,7 +74,7 @@
                         <span class="text-stone-400 text-sm font-medium">/ за ед.</span>
                     </div>
 
-                    <div th:if="${currentUser.company != null && currentUser.company.type.name() == 'CUSTOMER'}" class="space-y-4">
+                    <div th:if="${currentUser.company != null && currentUser.company.type.name() == 'CUSTOMER' && currentUser.role.name() == 'MANAGER'}" class="space-y-4">
                         <form th:action="@{/cart/add/{id}(id=${product.id})}" method="post" class="space-y-4">
                             <div class="flex items-center justify-between bg-stone-50 p-2 rounded-2xl border border-stone-100">
                                 <span class="ml-4 text-xs font-bold text-stone-400 uppercase tracking-widest">Количество</span>
