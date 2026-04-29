@@ -13,14 +13,12 @@
 <body class="py-10">
 
 <div class="max-w-7xl mx-auto px-4 lg:px-8">
-    <!-- Навигация -->
     <nav class="mb-10 flex justify-between items-center">
         <a href="/dashboard" class="text-stone-400 hover:text-stone-800 text-sm flex items-center transition font-bold">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
             Панель управления
         </a>
         <div class="flex items-center space-x-4">
-            <!-- Кнопка EXCEL -->
             <a href="/analytics/export" class="flex items-center bg-white border border-stone-200 text-stone-600 px-6 py-2 rounded-xl text-sm font-bold hover:bg-stone-50 transition shadow-sm">
                 <svg class="w-4 h-4 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -31,15 +29,12 @@
         <div class="bg-amber-100 text-amber-800 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.2em]">Модуль: Анализ и Прогнозирование</div>
     </nav>
 
-    <!-- Сетка KPI -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
-        <!-- 1. Всего потрачено -->
         <div class="bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm flex flex-col justify-between">
             <p class="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-4">Инвестировано всего</p>
             <p class="text-4xl font-black text-stone-900">[[${totalSpend != null ? totalSpend : 0}]] <span class="text-amber-700 text-2xl">Б</span></p>
         </div>
 
-        <!-- 2. Прогноз (Центральный акцент) -->
         <div class="bg-stone-900 text-white p-8 rounded-[2.5rem] shadow-xl relative overflow-hidden flex flex-col justify-between">
             <div>
                 <p class="text-[10px] font-black text-stone-500 uppercase tracking-widest mb-4">Прогноз следующей закупки</p>
@@ -49,14 +44,12 @@
             <div class="absolute -right-4 -bottom-4 text-white/5 text-8xl font-black italic">PREDICT</div>
         </div>
 
-        <!-- 3. Активные сделки -->
         <div class="bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm flex flex-col justify-between">
             <p class="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-4">Активных сделок</p>
             <p class="text-4xl font-black text-stone-900">[[${activeOrders}]]</p>
         </div>
     </div>
 
-    <!-- БЛОК БЮДЖЕТА (Растянутый на всю ширину) -->
     <div class="bg-white p-10 rounded-[3rem] border border-stone-100 shadow-sm mb-12">
         <div class="flex justify-between items-center mb-8">
             <div>
@@ -69,7 +62,6 @@
             </button>
         </div>
 
-        <!-- Шкала прогресса -->
         <div class="w-full bg-stone-50 h-6 rounded-2xl overflow-hidden mb-6 border border-stone-100 p-1">
             <div class="bg-gradient-to-r from-amber-700 to-amber-500 h-full rounded-xl transition-all duration-1000 shadow-inner"
                  th:style="'width: ' + ${budgetUsage > 100 ? 100 : budgetUsage} + '%'"></div>
@@ -92,9 +84,7 @@
         </div>
     </div>
 
-    <!-- Основные графики -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-        <!-- 1. Динамика трат -->
         <div class="bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm">
             <h3 class="text-lg font-black mb-6">Динамика расходов по месяцам</h3>
             <div class="chart-container h-[300px]"> <!-- ФИКСИРОВАННАЯ ВЫСОТА -->
@@ -102,7 +92,6 @@
             </div>
         </div>
 
-        <!-- 2. Категории -->
         <div class="bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm">
             <h3 class="text-lg font-black mb-6">Распределение по категориям</h3>
             <div class="chart-container h-[300px]"> <!-- ФИКСИРОВАННАЯ ВЫСОТА -->
@@ -112,7 +101,6 @@
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- 3. Топ товаров -->
         <div class="lg:col-span-2 bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm">
             <h3 class="text-lg font-black mb-6">Топ закупаемых товаров (ABC-анализ)</h3>
             <div class="chart-container h-[400px]"> <!-- ФИКСИРОВАННАЯ ВЫСОТА -->
@@ -120,7 +108,6 @@
             </div>
         </div>
 
-        <!-- 4. Таблица надежности -->
         <div class="bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm">
             <h3 class="text-lg font-black mb-6">Скорость поставки</h3>
             <div class="space-y-6">
@@ -143,11 +130,9 @@
 </div>
 
 <script th:inline="javascript">
-    // Настройки по умолчанию для всех графиков
     Chart.defaults.font.family = 'Inter, sans-serif';
     Chart.defaults.color = '#a8a29e';
 
-    // 1. График расходов
     const monthlyData = [[${monthlyStats}]];
     if (monthlyData && Object.keys(monthlyData).length > 0) {
         new Chart(document.getElementById('monthlyChart'), {
@@ -167,7 +152,6 @@
         });
     }
 
-    // 2. График категорий
     const categoryData = [[${categoryStats}]];
     if (categoryData && Object.keys(categoryData).length > 0) {
         new Chart(document.getElementById('categoryChart'), {
@@ -187,7 +171,6 @@
         });
     }
 
-    // 3. ABC Анализ
     const abcData = [[${abcData}]];
     if (abcData && Object.keys(abcData).length > 0) {
         new Chart(document.getElementById('abcChart'), {
@@ -209,5 +192,30 @@
         });
     }
 </script>
+<div id="budget-modal" class="hidden fixed inset-0 bg-stone-900/60 backdrop-blur-md z-[200] flex items-center justify-center p-4">
+    <div class="bg-white p-12 rounded-[3rem] shadow-2xl max-w-sm w-full transition-all transform scale-100">
+        <h3 class="text-2xl font-black text-stone-900 mb-2 text-center">Лимит бюджета</h3>
+        <p class="text-stone-400 text-sm mb-8 text-center">Введите максимальную сумму трат компании на месяц</p>
+
+        <form th:action="@{/analytics/set-budget}" method="post">
+            <div class="relative mb-8">
+                <input type="number" name="budget" th:value="${company.monthlyBudget}" step="0.01"
+                       class="w-full px-6 py-5 bg-stone-50 rounded-2xl text-2xl font-black text-center outline-none focus:ring-2 focus:ring-amber-700 border-none shadow-inner"
+                       placeholder="0.00">
+                <span class="absolute right-6 top-1/2 -translate-y-1/2 font-bold text-stone-300">Б</span>
+            </div>
+
+            <div class="flex flex-col space-y-3">
+                <button type="submit" class="w-full py-5 bg-stone-900 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-black transition shadow-lg shadow-stone-200">
+                    Применить лимит
+                </button>
+                <button type="button" onclick="document.getElementById('budget-modal').classList.add('hidden')"
+                        class="w-full py-2 text-stone-400 font-bold text-xs uppercase tracking-widest hover:text-stone-600 transition">
+                    Отмена
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 </body>
 </html>

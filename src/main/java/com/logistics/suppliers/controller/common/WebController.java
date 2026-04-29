@@ -20,6 +20,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -154,6 +155,26 @@ public class WebController {
         model.addAttribute("userEmail", currentUser.getEmail());
 
         return "dashboard";
+    }
+
+    @GetMapping("/forgot-password")
+    public String forgotPasswordForm() {
+        return "auth/forgot-password";
+    }
+
+    @PostMapping("/forgot-password")
+    public String processForgotPassword(@RequestParam String email, RedirectAttributes redirectAttributes) {
+        try {
+            authService.sendTemporaryPassword(email.trim());
+
+            redirectAttributes.addFlashAttribute("message", "Временный пароль отправлен!");
+            redirectAttributes.addFlashAttribute("messageType", "success");
+        } catch (Exception e) {
+            System.out.println("Ошибка поиска почты: [" + email + "]");
+            redirectAttributes.addFlashAttribute("message", "Ошибка: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("messageType", "error");
+        }
+        return "redirect:/forgot-password";
     }
 
 }

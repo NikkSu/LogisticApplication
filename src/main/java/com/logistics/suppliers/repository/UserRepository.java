@@ -13,6 +13,7 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
     List<User> findByCompany(Company company);
+    Optional<User> findByEmailIgnoreCase(String email);
     @Query("SELECT CAST(u.createdAt AS date) as date, COUNT(u) as count FROM User u GROUP BY CAST(u.createdAt AS date) ORDER BY date ASC")
     List<Object[]> getUserRegistrationStats();
 }
