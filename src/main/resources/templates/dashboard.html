@@ -20,49 +20,57 @@
 <body>
 
 <nav class="bg-white shadow-sm border-b border-stone-200 py-4 px-8 flex justify-between items-center sticky top-0 z-50">
-    <div class="flex items-center space-x-8">
-        <a href="/dashboard"><h1 class="text-2xl font-bold text-stone-800">Logistics<span class="text-amber-700">Hub</span></h1></a>
-
-        <a href="/companies" class="text-stone-600 hover:text-amber-800 font-medium text-sm">Компании</a>
-        <a th:if="${currentUser.company != null && currentUser.company.type.name() == 'SUPPLIER'}"
-           href="/my-products"
-           class="text-amber-800 font-bold text-sm bg-amber-50 px-3 py-1 rounded-lg">
-             Мои товары
+    <div class="flex items-center space-x-8 flex-1">
+        <a href="/dashboard" class="flex-shrink-0">
+            <h1 class="text-2xl font-bold text-stone-800">Logistics<span class="text-amber-700">Hub</span></h1>
         </a>
-        <form th:action="@{/dashboard}" method="get" class="relative">
-            <input type="hidden" name="category" th:value="${selectedCategory}">
-            <input type="text" name="search" th:value="${searchQuery}" placeholder="Поиск товаров..." class="w-96 pl-10 pr-4 py-2 border border-stone-300 rounded-full focus:outline-none focus:border-amber-700">
-            <svg class="w-5 h-5 text-stone-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-        </form>
-    </div>
 
-    <div class="flex items-center space-x-4">
-        <div class="flex flex-col items-end">
-            <a href="/profile" class="text-sm font-bold text-stone-800 hover:text-amber-800 transition block" th:text="${userEmail}">
-                user@mail.com
+        <div class="flex items-center space-x-4 flex-shrink-0">
+            <a href="/companies" class="text-stone-600 hover:text-amber-800 font-medium text-sm">Компании</a>
+
+            <a th:if="${currentUser.company != null && currentUser.company.type.name() == 'CUSTOMER' && currentUser.role.name() == 'MANAGER'}"
+               href="/my-products"
+               class="text-amber-800 font-bold text-sm bg-amber-50 px-3 py-1 rounded-lg hover:bg-amber-100 transition">
+                Мои товары
             </a>
 
-            <div class="mt-0.5">
-                <a th:if="${currentUser != null && currentUser.company != null}"
-                   href="/companies/my"
-                   class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 hover:bg-amber-200 transition uppercase tracking-wider">
-                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
-                    <span th:text="${currentUser.company.name}">Название компании</span>
-                </a>
+            <a th:if="${currentUser.company != null && (isOwner || currentUser.role.name() == 'ANALYST')}"
+               href="/analytics"
+               class="text-stone-600 hover:text-amber-800 font-medium text-sm flex items-center">
+                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                Аналитика
+            </a>
+        </div>
 
-                <a th:if="${currentUser != null && currentUser.company == null}"
-                   href="/companies"
-                   class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-stone-100 text-stone-500 hover:bg-stone-200 transition uppercase tracking-wider">
+        <form th:action="@{/dashboard}" method="get" class="relative flex-1 max-w-md">
+            <input type="hidden" name="category" th:value="${selectedCategory}">
+            <input type="text" name="search" th:value="${searchQuery}" placeholder="Поиск товаров..."
+                   class="w-full pl-10 pr-4 py-2 border border-stone-300 rounded-full focus:outline-none focus:border-amber-700 text-sm">
+            <svg class="w-5 h-5 text-stone-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        </form>
+
+        <a th:if="${currentUser.company != null && currentUser.company.type.name() == 'CUSTOMER' && currentUser.role.name() == 'MANAGER'}"
+           href="/cart" class="relative p-2 text-stone-600 hover:bg-stone-100 rounded-full transition flex-shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+            <span th:if="${cartSize > 0}" class="absolute top-0 right-0 bg-amber-600 text-white text-[8px] w-4 h-4 rounded-full flex items-center justify-center border border-white" th:text="${cartSize}"></span>
+        </a>
+    </div>
+
+    <div class="flex items-center space-x-4 flex-shrink-0 ml-6">
+        <div class="flex flex-col items-end">
+            <a href="/profile" class="text-sm font-bold text-stone-800 hover:text-amber-800 transition block" th:text="${userEmail}"></a>
+            <div class="mt-0.5">
+                <a th:if="${currentUser != null && currentUser.company != null}" href="/companies/my" class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 hover:bg-amber-200 uppercase tracking-wider">
+                    <span th:text="${currentUser.company.name}"></span>
+                </a>
+                <a th:if="${currentUser != null && currentUser.company == null}" href="/companies" class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-stone-100 text-stone-500 hover:bg-stone-200 uppercase tracking-wider">
                     🏢 Выбрать компанию
                 </a>
             </div>
         </div>
-
         <a href="/profile" class="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-sm hover:scale-105 transition flex items-center justify-center bg-stone-800 text-white font-bold">
-            <img th:if="${currentUser.avatarUrl != null && !currentUser.avatarUrl.isEmpty()}"
-                 th:src="${currentUser.avatarUrl}" class="w-full h-full object-cover">
-            <span th:unless="${currentUser.avatarUrl != null && !currentUser.avatarUrl.isEmpty()}"
-                  th:text="${userEmail.substring(0,1).toUpperCase()}"></span>
+            <img th:if="${currentUser.avatarUrl != null && !currentUser.avatarUrl.isEmpty()}" th:src="${currentUser.avatarUrl}" class="w-full h-full object-cover">
+            <span th:unless="${currentUser.avatarUrl != null && !currentUser.avatarUrl.isEmpty()}" th:text="${userEmail.substring(0,1).toUpperCase()}"></span>
         </a>
     </div>
 </nav>
@@ -105,12 +113,39 @@
                     </a>
                     <p class="text-xs text-stone-400 mb-3" th:text="${product.category != null ? product.category.name : 'Без категории'}"></p>
                     <div class="flex items-center justify-between mt-4">
-                        <span class="text-lg font-bold text-stone-900" th:text="${#numbers.formatDecimal(product.price, 1, 2) + ' ₽'}"></span>
-                        <button class="btn-buy text-white p-2 rounded-lg shadow-md">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                        </button>
+                        <span class="text-lg font-black text-stone-900" th:text="${#numbers.formatDecimal(product.price, 1, 2) + ' Б'}"></span>
+
+                        <div class="flex items-center space-x-1">
+                            <form th:action="@{/favorites/toggle/{id}(id=${product.id})}" method="post">
+                                <button type="submit" class="p-2 rounded-xl hover:bg-stone-100 transition group/fav">
+                                    <svg th:if="${favoriteIds.contains(product.id)}" class="w-5 h-5 text-red-500 fill-current" viewBox="0 0 24 24">
+                                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                    </svg>
+                                    <svg th:unless="${favoriteIds.contains(product.id)}" class="w-5 h-5 text-stone-300 fill-none stroke-current group-hover/fav:text-red-400 transition" stroke-width="2" viewBox="0 0 24 24">
+                                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                                    </svg>
+                                </button>
+                            </form>
+
+                            <!-- 1. Кнопка КОРЗИНЫ (Только для Менеджера) -->
+                            <form th:if="${currentUser.company != null && currentUser.company.type.name() == 'CUSTOMER' && currentUser.role.name() == 'MANAGER'}"
+                                  th:action="@{/cart/add/{id}(id=${product.id})}" method="post">
+                                <button type="submit" class="btn-buy text-white p-2 rounded-xl shadow-md flex items-center justify-center">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                                </button>
+                            </form>
+
+                            <!-- 2. Иконка ГЛАЗА (Только для Аналитика или Поставщика), чтобы заменять кнопку корзины визуально -->
+                            <a th:if="${currentUser.company != null && (currentUser.role.name() == 'ANALYST' || currentUser.company.type.name() == 'SUPPLIER')}"
+                               th:href="@{/product/{id}(id=${product.id})}"
+                               class="p-2 text-stone-400 hover:text-amber-800 transition">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                            </a>
+                        </div>
                     </div>
-                </div>
             </div>
         </div>
 
@@ -138,6 +173,26 @@
         </div>
     </main>
 </div>
+<a th:if="${cartSize != null && cartSize > 0 && currentUser.role.name() == 'MANAGER'}"
+   href="/cart"
+   class="fixed bottom-10 right-10 z-[100] group">
 
+    <div class="absolute inset-0 bg-amber-800 rounded-full animate-ping opacity-20 group-hover:opacity-40 transition-opacity"></div>
+
+    <div class="relative bg-stone-900 text-white p-5 rounded-full shadow-2xl transform transition-all duration-300 group-hover:scale-110 group-hover:bg-amber-800 flex items-center justify-center">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+        </svg>
+
+        <div class="absolute -top-1 -right-1 bg-amber-600 text-white text-[10px] font-black w-6 h-6 rounded-full flex items-center justify-center border-2 border-[#FDFBF7]"
+             th:text="${cartSize}">
+            0
+        </div>
+    </div>
+
+    <div class="absolute right-full mr-4 top-1/2 -translate-y-1/2 bg-stone-800 text-white text-xs py-2 px-4 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-lg">
+        Перейти к оформлению (<span class="text-amber-400">[[${cartSize}]]</span>)
+    </div>
+</a>
 </body>
 </html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Аналитика продаж | Logistics Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background-color: #FDFBF7; }
+        .chart-container { position: relative; width: 100%; height: 300px; }
+    </style>
+</head>
+<body class="py-10">
+
+<div class="max-w-7xl mx-auto px-4 lg:px-8">
+    <nav class="mb-10 flex justify-between items-center">
+        <a href="/dashboard" class="text-stone-400 hover:text-stone-800 text-sm flex items-center font-bold">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            Панель управления
+        </a>
+        <div class="bg-blue-100 text-blue-800 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">Аналитика продаж</div>
+    </nav>
+
+    <h1 class="text-4xl font-black text-stone-900 mb-10 text-center lg:text-left">Эффективность: [[${company.name}]]</h1>
+
+    <!-- KPI КАРТОЧКИ -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+        <div class="bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm">
+            <p class="text-[10px] font-black uppercase text-stone-400 mb-2">Общая выручка</p>
+            <p class="text-4xl font-black text-blue-600">[[${totalSpend}]] <span class="text-stone-400 text-2xl">Б</span></p>
+        </div>
+        <div class="bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm">
+            <p class="text-[10px] font-black uppercase text-stone-400 mb-2">Заказов выполнено</p>
+            <p class="text-4xl font-black text-stone-900">[[${totalOrders}]]</p>
+        </div>
+        <div class="bg-blue-600 p-8 rounded-[2.5rem] shadow-xl text-white relative overflow-hidden">
+            <p class="text-[10px] font-black uppercase text-blue-200 mb-2">Активные продажи</p>
+            <p class="text-4xl font-black">[[${activeOrders}]]</p>
+            <div class="absolute -right-4 -bottom-4 text-white/10 text-7xl font-black italic">SALES</div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- График 1: Выручка -->
+        <div class="bg-white p-10 rounded-[3rem] border border-stone-100 shadow-sm">
+            <h3 class="text-xl font-black mb-8 italic text-stone-800">Динамика выручки по месяцам</h3>
+            <div class="chart-container">
+                <canvas id="salesChart"></canvas>
+            </div>
+        </div>
+
+        <!-- График 2: Популярные товары -->
+        <div class="bg-white p-10 rounded-[3rem] border border-stone-100 shadow-sm">
+            <h3 class="text-xl font-black mb-8 italic text-stone-800">Топ-5 товаров по объему продаж</h3>
+            <div class="chart-container">
+                <canvas id="topProductsChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    Chart.defaults.font.family = 'Inter, sans-serif';
+
+    // 1. Выручка (Bar Chart)
+    const salesData = [[${monthlyStats}]];
+    if (salesData && Object.keys(salesData).length > 0) {
+        new Chart(document.getElementById('salesChart'), {
+            type: 'bar',
+            data: {
+                labels: Object.keys(salesData),
+                datasets: [{
+                    label: 'Выручка (Б)',
+                    data: Object.values(salesData),
+                    backgroundColor: '#2563eb',
+                    borderRadius: 10
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false }
+        });
+    }
+
+    // 2. Популярные товары (Horizontal Bar)
+    const productData = [[${topProducts}]];
+    if (productData && Object.keys(productData).length > 0) {
+        new Chart(document.getElementById('topProductsChart'), {
+            type: 'bar',
+            data: {
+                labels: Object.keys(productData),
+                datasets: [{
+                    label: 'Продано штук',
+                    data: Object.values(productData),
+                    backgroundColor: '#60a5fa',
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    }
+</script>
+</body>
+</html>
