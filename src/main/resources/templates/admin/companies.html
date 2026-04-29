@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Реестр компаний | Admin</title>
+    <!-- ПОДКЛЮЧЕНИЕ СТИЛЕЙ (Tailwind) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="flex">
+
+<!-- БОКОВОЕ МЕНЮ (Sidebar) -->
+<aside class="w-64 h-screen bg-stone-900 text-white fixed p-6 flex flex-col">
+    <h1 class="text-xl font-black mb-10 text-amber-500 italic text-center border-b border-stone-800 pb-4">
+        Logistics Admin
+    </h1>
+    <nav class="space-y-2 flex-1">
+        <a href="/admin/dashboard" class="block py-3 px-4 hover:bg-stone-800 rounded-xl text-sm text-stone-400 transition">📊 Обзор системы</a>
+        <a href="/admin/companies" class="block py-3 px-4 bg-amber-700 rounded-xl text-sm font-bold text-white shadow-lg">🏢 Реестр компаний</a>
+        <a href="/admin/categories" class="block py-3 px-4 hover:bg-stone-800 rounded-xl text-sm text-stone-400 transition">🏷️ Классификатор</a>
+    </nav>
+
+    <div class="pt-6 border-t border-stone-800">
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="w-full text-left py-3 px-4 text-red-400 text-xs font-bold uppercase hover:text-red-300 transition">
+                Выйти из системы
+            </button>
+        </form>
+    </div>
+</aside>
+
+<!-- ОСНОВНОЙ КОНТЕНТ -->
+<main class="ml-64 p-10 w-full">
+    <header class="mb-10">
+        <h2 class="text-3xl font-black text-stone-800">Реестр компаний</h2>
+        <p class="text-stone-400">Список всех зарегистрированных участников системы и управление ими</p>
+    </header>
+
+    <!-- ТАБЛИЦА -->
+    <div class="bg-white rounded-[2.5rem] border border-stone-100 shadow-sm overflow-hidden">
+        <table class="w-full text-left border-collapse">
+            <thead class="bg-stone-50 text-stone-400 text-[10px] font-black uppercase tracking-widest">
+            <tr>
+                <th class="px-8 py-5">Компания</th>
+                <th class="px-8 py-5">Тип бизнеса</th>
+                <th class="px-8 py-5">Владелец (Email)</th>
+                <th class="px-8 py-5 text-right">Действия</th>
+            </tr>
+            </thead>
+            <tbody class="divide-y divide-stone-100">
+            <tr th:each="comp : ${companies}" class="hover:bg-stone-50/50 transition">
+                <!-- Название и Лого -->
+                <td class="px-8 py-5">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-xl bg-stone-100 flex items-center justify-center text-stone-500 font-bold uppercase"
+                             th:text="${comp.name != null && !comp.name.isEmpty() ? comp.name.substring(0,1) : '?'}"></div>
+                        <span class="font-bold text-stone-800" th:text="${comp.name}">Название</span>
+                    </div>
+                </td>
+
+                <!-- Тип -->
+                <td class="px-8 py-5">
+                        <span th:if="${comp.type != null}"
+                              th:class="${comp.type.name() == 'SUPPLIER' ? 'text-blue-600 bg-blue-50' : 'text-amber-600 bg-amber-50'} + ' px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-tighter'"
+                              th:text="${comp.type}">
+                        </span>
+                </td>
+
+                <!-- Владелец -->
+                <td class="px-8 py-5 text-sm text-stone-500 font-medium"
+                    th:text="${comp.owner != null ? comp.owner.email : 'Системная запись'}">
+                </td>
+
+                <!-- Кнопка удаления -->
+                <td class="px-8 py-5 text-right">
+                    <form th:action="@{/admin/companies/delete/{id}(id=${comp.id})}" method="post"
+                          onsubmit="return confirm('ВНИМАНИЕ! Удаление компании приведет к удалению всех её товаров и сбросу ролей сотрудников. Продолжить?');">
+                        <button type="submit" class="text-red-400 hover:text-red-600 font-black text-[10px] uppercase tracking-widest transition">
+                            Удалить
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <!-- Если список пуст -->
+        <div th:if="${companies.isEmpty()}" class="py-20 text-center text-stone-400 italic">
+            В системе пока не зарегистрировано ни одной компании
+        </div>
+    </div>
+</main>
+
+</body>
+</html>
