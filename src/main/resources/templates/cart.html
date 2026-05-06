@@ -4,129 +4,179 @@
     <meta charset="UTF-8">
     <title>Корзина | Logistics Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #FDFBF7; }
+        body { background-color: #FFF9F8; font-family: 'Inter', sans-serif; }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
+        .product-row { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .product-row:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(30, 58, 138, 0.05); border-color: #D4652F; }
     </style>
 </head>
 <body class="py-10">
-<div class="max-w-6xl mx-auto px-4">
-    <nav class="mb-8"><a href="/dashboard" class="text-stone-400 hover:text-stone-800 text-sm flex items-center transition">
-        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-        Назад к покупкам
-    </a></nav>
 
-    <h1 class="text-4xl font-black text-stone-900 mb-10">Корзина компании</h1>
+<div class="max-w-7xl mx-auto px-4 lg:px-8">
+    <!-- Навигация -->
+    <nav class="mb-10 flex justify-between items-center">
+        <a href="/dashboard" class="group flex items-center text-stone-400 hover:text-[#1E3A8A] transition">
+            <svg class="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            Вернуться в каталог
+        </a>
+        <div class="px-4 py-1.5 bg-[#1E3A8A]/10 text-[#1E3A8A] rounded-full text-[10px] font-black uppercase tracking-widest">
+            Корзина закупок
+        </div>
+    </nav>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+    <h1 class="text-4xl font-black text-stone-900 mb-12 tracking-tight">Оформление заказа</h1>
 
-        <!-- ЛЕВАЯ КОЛОНКА (ТОВАРЫ) -->
-        <div class="lg:col-span-2">
-            <div th:if="${items.isEmpty()}" class="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-stone-200">
-                <p class="text-stone-400 text-lg">Корзина пуста</p>
-                <a href="/dashboard" class="text-amber-800 font-bold mt-4 inline-block hover:underline">Перейти в каталог</a>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+
+        <!-- ЛЕВАЯ КОЛОНКА (ТОВАРЫ) -> 8 из 12 -->
+        <div class="lg:col-span-8">
+
+            <!-- Пустое состояние -->
+            <div th:if="${items.isEmpty()}" class="text-center py-32 bg-white rounded-[3rem] border-2 border-dashed border-stone-100 shadow-sm">
+                <div class="w-24 h-24 bg-stone-50 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl">🛒</div>
+                <p class="text-stone-800 text-xl font-bold mb-2">Ваша корзина пуста</p>
+                <p class="text-stone-400 text-sm mb-8">Самое время выбрать нужные товары в каталоге</p>
+                <a href="/dashboard" class="px-8 py-4 bg-[#1E3A8A] text-white rounded-2xl font-black uppercase tracking-widest hover:bg-[#152c6e] transition shadow-lg shadow-blue-900/20">
+                    Перейти к покупкам
+                </a>
             </div>
 
-            <div th:each="entry : ${groupedItems}" class="mb-10">
-                <div class="flex items-center space-x-3 mb-4 bg-stone-100 p-4 rounded-2xl border border-stone-200">
-                    <span class="text-[10px] font-black uppercase text-stone-500 tracking-widest">Поставщик</span>
-                    <a th:href="@{/companies/view/{id}(id=${entry.key.id})}" class="font-bold text-stone-800 hover:text-amber-800 transition" th:text="${entry.key.name}"></a>
+            <!-- Группы товаров -->
+            <div th:each="entry : ${groupedItems}" class="mb-12">
+                <!-- Плашка поставщика -->
+                <div class="flex items-center space-x-3 mb-6 px-4">
+                    <span class="text-[10px] font-black uppercase text-stone-400 tracking-[0.2em]">Поставщик:</span>
+                    <a th:href="@{/companies/view/{id}(id=${entry.key.id})}"
+                       class="font-black text-lg text-stone-800 hover:text-[#D4652F] transition underline decoration-[#D4652F]/30"
+                       th:text="${entry.key.name}"></a>
                 </div>
 
+                <!-- Список товаров -->
                 <div class="space-y-4">
-                    <div th:each="item : ${entry.value}" class="bg-white p-6 rounded-3xl border border-stone-100 flex items-center shadow-sm hover:border-amber-200 transition group">
-                        <a th:href="@{/product/{id}(id=${item.product.id})}" class="flex-shrink-0">
-                            <img th:src="${item.product.imageUrl != null ? item.product.imageUrl : 'https://via.placeholder.com/150'}" class="w-24 h-24 rounded-2xl object-cover mr-6 bg-stone-50 group-hover:scale-105 transition">
+                    <div th:each="item : ${entry.value}" class="product-row bg-white p-6 rounded-[2rem] border border-stone-100 flex flex-col md:flex-row md:items-center gap-6 shadow-sm group">
+
+                        <!-- Картинка -->
+                        <a th:href="@{/product/{id}(id=${item.product.id})}" class="flex-shrink-0 relative overflow-hidden rounded-[1.5rem] w-24 h-24 bg-stone-50">
+                            <img th:src="${item.product.imageUrl != null ? item.product.imageUrl : 'https://via.placeholder.com/150'}"
+                                 class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
                         </a>
+
+                        <!-- Инфо -->
                         <div class="flex-1 min-w-0">
-                            <a th:href="@{/product/{id}(id=${item.product.id})}" class="block">
-                                <h4 class="font-bold text-stone-800 hover:text-amber-800 transition truncate pr-4" th:text="${item.product.name}"></h4>
+                            <a th:href="@{/product/{id}(id=${item.product.id})}" class="block mb-1">
+                                <h4 class="font-bold text-stone-800 text-lg hover:text-[#D4652F] transition truncate pr-4" th:text="${item.product.name}"></h4>
                             </a>
-                            <p class="text-[10px] text-stone-400 mt-1">Добавил: <span class="font-bold" th:text="${item.addedBy.email}"></span></p>
+                            <p class="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-3">
+                                Добавил: <span class="text-[#1E3A8A]" th:text="${item.addedBy.email}"></span>
+                            </p>
+
+                            <!-- Остатки -->
+                            <div th:if="${item.product.stockQuantity != null && item.product.stockQuantity < item.quantity}"
+                                 class="inline-flex items-center px-3 py-1.5 rounded-lg bg-red-50 border border-red-100 text-red-600 text-[10px] font-black uppercase tracking-widest">
+                                <span class="mr-2 text-sm">⚠️</span> Недостаточно (Остаток: [[${item.product.stockQuantity}]])
+                            </div>
                         </div>
 
-                        <div class="flex items-center space-x-8">
-                            <div class="text-right whitespace-nowrap">
-                                <p class="font-black text-stone-900 text-lg" th:text="${#numbers.formatDecimal(item.product.price * item.quantity, 1, 2) + ' Б'}"></p>
-                                <p class="text-[10px] text-stone-400 uppercase font-bold" th:text="${item.product.price + ' Б / шт.'}"></p>
+                        <!-- Цена и Управление -->
+                        <div class="flex flex-col md:items-end justify-between space-y-4 md:space-y-0">
+                            <div class="text-right">
+                                <p class="font-black text-[#1E3A8A] text-2xl leading-none" th:text="${#numbers.formatDecimal(item.product.price * item.quantity, 1, 2) + ' Б'}"></p>
+                                <p class="text-[10px] text-stone-400 uppercase font-black tracking-widest mt-1" th:text="${item.product.price + ' Б / шт.'}"></p>
                             </div>
-                            <div class="flex items-center bg-stone-100 rounded-xl p-1 border border-stone-200">
-                                <form th:action="@{/cart/update/{id}(id=${item.id})}" method="post">
-                                    <input type="hidden" name="quantity" th:value="${item.quantity - 1}">
-                                    <button type="submit" class="w-8 h-8 flex items-center justify-center text-stone-600 hover:text-amber-800 font-bold transition">-</button>
-                                </form>
-                                <form th:action="@{/cart/update/{id}(id=${item.id})}" method="post" class="w-12">
-                                    <input type="number" name="quantity" th:value="${item.quantity}" onchange="this.form.submit()" class="w-full bg-transparent border-none focus:ring-0 text-center font-bold text-stone-800 p-0">
-                                </form>
-                                <form th:action="@{/cart/update/{id}(id=${item.id})}" method="post">
-                                    <input type="hidden" name="quantity" th:value="${item.quantity + 1}">
-                                    <button type="submit" class="w-8 h-8 flex items-center justify-center text-stone-600 hover:text-amber-800 font-bold transition">+</button>
+
+                            <div class="flex items-center space-x-4">
+                                <!-- Контрол количества -->
+                                <div class="flex items-center bg-stone-50 rounded-xl p-1 border border-stone-100">
+                                    <form th:action="@{/cart/update/{id}(id=${item.id})}" method="post">
+                                        <input type="hidden" name="quantity" th:value="${item.quantity - 1}">
+                                        <button type="submit" class="w-8 h-8 flex items-center justify-center text-stone-400 hover:text-[#D4652F] font-black transition">-</button>
+                                    </form>
+                                    <form th:action="@{/cart/update/{id}(id=${item.id})}" method="post" class="w-10">
+                                        <input type="number" name="quantity" th:value="${item.quantity}" onchange="this.form.submit()"
+                                               class="w-full bg-transparent border-none focus:ring-0 text-center font-black text-stone-800 p-0 text-sm">
+                                    </form>
+                                    <form th:action="@{/cart/update/{id}(id=${item.id})}" method="post">
+                                        <input type="hidden" name="quantity" th:value="${item.quantity + 1}">
+                                        <button type="submit" class="w-8 h-8 flex items-center justify-center text-stone-400 hover:text-[#1E3A8A] font-black transition">+</button>
+                                    </form>
+                                </div>
+
+                                <!-- Удалить -->
+                                <form th:action="@{/cart/remove/{id}(id=${item.id})}" method="post">
+                                    <button type="submit" class="w-10 h-10 flex items-center justify-center rounded-xl bg-red-50 text-red-400 hover:bg-red-500 hover:text-white transition">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>
                                 </form>
                             </div>
-                            <form th:action="@{/cart/remove/{id}(id=${item.id})}" method="post">
-                                <button type="submit" class="text-stone-300 hover:text-red-500 transition p-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
-                            </form>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ПРАВАЯ КОЛОНКА (ИТОГО + БЮДЖЕТ) -->
-        <div class="space-y-6">
+        <!-- ПРАВАЯ КОЛОНКА (ИТОГО + БЮДЖЕТ) -> 4 из 12 -->
+        <div class="lg:col-span-4 space-y-6">
 
             <!-- Блок Бюджета -->
-            <div class="bg-white p-8 rounded-3xl border border-stone-100 shadow-sm" th:if="${monthlyLimit > 0}">
-                <h3 class="font-bold text-stone-800 mb-4 flex items-center">
-                    <span class="mr-2">💳</span> Состояние бюджета
+            <div th:if="${monthlyLimit > 0}" class="bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm">
+                <h3 class="font-black text-stone-800 mb-6 flex items-center text-lg">
+                    <span class="mr-2">💳</span> Бюджет
                 </h3>
-                <div class="space-y-3">
-                    <div class="flex justify-between text-xs">
-                        <span class="text-stone-400">Лимит на месяц:</span>
-                        <span class="font-bold text-stone-800">[[${monthlyLimit}]] Б</span>
+
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center text-sm border-b border-stone-50 pb-2">
+                        <span class="text-stone-400 font-medium">Лимит на месяц:</span>
+                        <span class="font-black text-stone-800">[[${monthlyLimit}]] Б</span>
                     </div>
-                    <div class="flex justify-between text-xs">
-                        <span class="text-stone-400">Уже потрачено:</span>
-                        <span class="font-bold text-stone-800">[[${spentThisMonth}]] Б</span>
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-stone-400 font-medium">Освоено:</span>
+                        <span class="font-black text-stone-800">[[${spentThisMonth}]] Б</span>
                     </div>
 
-                    <!-- Индикатор превышения -->
-                    <div th:if="${isOverBudget}" class="mt-4 p-3 bg-red-50 border border-red-100 rounded-xl">
-                        <p class="text-[10px] font-black text-red-600 uppercase mb-1">⚠ Внимание! Превышение</p>
-                        <p class="text-xs text-red-700">Заказ превысит лимит на <span class="font-bold">[[${excessAmount}]] Б</span></p>
+                    <!-- Alert Превышения -->
+                    <div th:if="${isOverBudget}" class="mt-6 p-4 bg-red-50 border border-red-100 rounded-2xl">
+                        <p class="text-[10px] font-black text-red-600 uppercase tracking-widest mb-1 flex items-center">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                            Превышение лимита
+                        </p>
+                        <p class="text-sm font-medium text-red-800 mt-2">Заказ превысит бюджет на <span class="font-black">[[${excessAmount}]] Б</span></p>
                     </div>
-                    <div th:unless="${isOverBudget}" class="mt-4 p-3 bg-green-50 border border-green-100 rounded-xl">
-                        <p class="text-[10px] font-black text-green-600 uppercase">✓ В рамках бюджета</p>
+
+                    <!-- Alert В рамках бюджета -->
+                    <div th:unless="${isOverBudget}" class="mt-6 p-4 bg-green-50 border border-green-100 rounded-2xl flex items-center">
+                        <svg class="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        <p class="text-xs font-black text-green-700 uppercase tracking-widest">В рамках бюджета</p>
                     </div>
                 </div>
             </div>
 
             <!-- Детали заказа -->
-            <div class="bg-white p-8 rounded-3xl border border-stone-100 shadow-sm sticky top-10">
-                <h3 class="font-bold text-xl mb-6">Детали заказа</h3>
+            <div class="bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm sticky top-28">
+                <h3 class="font-black text-xl mb-8 text-stone-900">Итого к оплате</h3>
                 <div class="space-y-4 mb-8">
-                    <div class="flex justify-between text-sm">
-                        <span class="text-stone-400">Всего позиций:</span>
-                        <span class="font-bold" th:text="${items.size()}"></span>
+                    <div class="flex justify-between items-center text-sm border-b border-stone-50 pb-3">
+                        <span class="text-stone-400 font-medium">Всего позиций:</span>
+                        <span class="font-black text-stone-800" th:text="${items.size()}"></span>
                     </div>
-                    <div class="border-t border-stone-50 pt-4 flex justify-between items-end">
-                        <span class="text-stone-400 font-medium text-sm uppercase tracking-widest">Общий итог:</span>
-                        <span class="text-3xl font-black text-amber-900" th:text="${total + ' Б'}"></span>
+                    <div class="flex justify-between items-center text-sm border-b border-stone-50 pb-3">
+                        <span class="text-stone-400 font-medium">Счетов будет создано:</span>
+                        <span class="font-black text-stone-800" th:text="${groupedItems.size()}"></span>
+                    </div>
+                    <div class="pt-4 flex flex-col items-end">
+                        <span class="text-5xl font-black text-[#D4652F] leading-none" th:text="${total}"></span>
+                        <span class="text-xs font-black text-stone-300 uppercase tracking-widest mt-2">Белорусских рублей</span>
                     </div>
                 </div>
 
-                <!-- Форма оформления с JS-проверкой -->
                 <form th:action="@{/orders/create}" method="post" id="order-form">
                     <button type="submit" th:disabled="${items.isEmpty()}"
-                            class="w-full py-5 bg-stone-900 text-white rounded-2xl font-bold text-lg hover:bg-black transition disabled:opacity-50 shadow-xl shadow-stone-200">
+                            class="w-full py-5 bg-[#1E3A8A] text-white rounded-2xl font-black uppercase tracking-widest hover:bg-[#152c6e] transition disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-blue-900/20">
                         Оформить заказ
                     </button>
                 </form>
-
-                <p class="text-[10px] text-center text-stone-400 mt-4 uppercase font-bold tracking-tighter">
-                    Сумма будет разделена на [[${groupedItems.size()}]] счета
-                </p>
             </div>
         </div>
     </div>
@@ -138,7 +188,7 @@
 
     document.getElementById('order-form').onsubmit = function() {
         if (isOverBudget) {
-            return confirm("Внимание! Общая сумма закупок в этом месяце превысит установленный бюджет на " + excessAmount + " Б. Вы действительно хотите оформить заказ?");
+            return confirm("ВНИМАНИЕ!\n\nОбщая сумма закупок в этом месяце превысит установленный бюджет на " + excessAmount + " Б.\n\nВы действительно хотите оформить заказ?");
         }
         return true;
     };

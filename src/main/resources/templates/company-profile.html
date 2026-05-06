@@ -4,159 +4,191 @@
     <meta charset="UTF-8">
     <title>Управление компанией | Logistics Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #FDFBF7; }
-        .owner-badge { background-color: #8B4513; color: white; }
-        .member-badge { background-color: #D2B48C; color: #5D2E0B; }
-        .tooltip-arrow { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 4px solid transparent; border-top-color: #1c1917; }
+        body { background-color: #FFF9F8; font-family: 'Inter', sans-serif; }
+        .owner-badge { background-color: #D4652F; color: white; }
+        .member-badge { background-color: #1E3A8A; color: white; }
+
+        /* Тултипы: только при наведении на кнопку */
+        .btn-group { position: relative; }
+        .tooltip {
+            position: absolute; bottom: 125%; left: 50%; transform: translateX(-50%);
+            background: #1c1917; color: white; padding: 6px 10px; border-radius: 8px;
+            font-size: 10px; font-weight: 800; text-transform: uppercase;
+            white-space: nowrap; opacity: 0; visibility: hidden; transition: 0.2s; z-index: 60;
+        }
+        .btn-group:hover .tooltip { opacity: 1; visibility: visible; }
+
+        /* Кнопки действий */
+        .action-icon-btn { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 12px; transition: all 0.3s; }
+        .hidden-panel { display: none; }
     </style>
 </head>
 <body class="py-10">
 
-<div class="max-w-6xl mx-auto px-4">
-    <!-- Уведомление (Toast) -->
-    <div th:if="${message}" id="toast" class="fixed top-5 right-5 z-[200] bg-white border-l-4 border-amber-600 p-4 shadow-2xl rounded-r-xl transition-all duration-500">
-        <p class="text-xs font-black uppercase text-stone-400 mb-1" th:text="${messageType == 'success' ? 'Успех' : 'Ошибка'}"></p>
-        <p class="text-stone-800 font-bold" th:text="${message}"></p>
-    </div>
-
+<div class="max-w-7xl mx-auto px-4 lg:px-8">
     <!-- Навигация -->
-    <div class="flex justify-between items-center mb-8">
-        <a href="/dashboard" class="text-stone-400 hover:text-stone-800 text-sm flex items-center transition">
-            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-            Назад на витрину
+    <nav class="flex justify-between items-center mb-10">
+        <a href="/dashboard" class="group flex items-center text-stone-400 hover:text-[#1E3A8A] transition font-bold text-sm">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            Назад в каталог
         </a>
-        <div class="flex items-center space-x-4">
-            <span class="text-stone-500 text-sm font-medium" th:text="${currentUser.email}"></span>
-            <form th:action="@{/logout}" method="post">
-                <button type="submit" class="text-red-600 font-bold text-sm hover:underline">Выйти</button>
-            </form>
+        <div class="flex items-center space-x-6">
+            <span class="text-stone-500 text-sm font-semibold" th:text="${currentUser.email}"></span>
+            <form th:action="@{/logout}" method="post"><button type="submit" class="text-red-500 font-black uppercase text-[10px] tracking-widest">Выйти</button></form>
         </div>
-    </div>
+    </nav>
 
     <!-- ШАПКА -->
-    <div class="bg-white p-8 rounded-3xl shadow-sm border border-stone-100 mb-8 flex items-center justify-between">
-        <div class="flex items-center space-x-6">
+    <div class="bg-white p-10 rounded-[2.5rem] shadow-sm border border-stone-100 mb-10 flex flex-col md:flex-row items-center justify-between gap-8">
+        <div class="flex items-center space-x-8">
             <div th:if="${company.logoUrl == null || company.logoUrl.isEmpty()}"
-                 class="w-16 h-16 rounded-2xl bg-stone-800 text-white flex items-center justify-center font-bold text-2xl uppercase"
+                 class="w-20 h-20 rounded-3xl bg-[#1E3A8A] text-white flex items-center justify-center font-black text-3xl uppercase"
                  th:text="${company.name.substring(0,1)}"></div>
             <img th:if="${company.logoUrl != null && !company.logoUrl.isEmpty()}"
-                 th:src="${company.logoUrl}" class="w-16 h-16 rounded-2xl object-cover">
+                 th:src="${company.logoUrl}" class="w-20 h-20 rounded-3xl object-cover shadow-sm">
             <div>
-                <h1 class="text-2xl font-bold text-stone-800" th:text="${company.name}"></h1>
-                <p class="text-stone-500 text-sm" th:text="${company.type == T(com.logistics.suppliers.model.CompanyType).SUPPLIER ? 'Поставщик' : 'Заказчик'}"></p>
+                <h1 class="text-4xl font-black text-stone-900 tracking-tight" th:text="${company.name}"></h1>
+                <p class="text-[10px] font-black uppercase tracking-widest text-stone-400 mt-1" th:text="${company.type}"></p>
             </div>
         </div>
 
         <div class="flex items-center space-x-4">
-            <!-- КНОПКА НАСТРОЕК -->
             <button th:if="${canManage}" onclick="document.getElementById('edit-modal').classList.remove('hidden')"
-                    class="px-4 py-2 bg-stone-100 text-stone-600 rounded-xl text-xs font-bold hover:bg-stone-200 transition">
-                ⚙️ Настройки
+                    class="px-6 py-3 bg-stone-50 text-stone-600 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-stone-800 hover:text-white transition border border-stone-100">
+                Настройки профиля
             </button>
-            <div th:class="${isOwner ? 'owner-badge' : 'member-badge'} + ' px-4 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest'"
+            <div th:class="${isOwner ? 'owner-badge' : 'member-badge'} + ' px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest'"
                  th:text="${isOwner ? 'Владелец' : 'Сотрудник'}"></div>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        <div class="lg:col-span-2 space-y-8">
-            <!-- КОМАНДА -->
-            <div class="bg-white p-6 rounded-3xl shadow-sm border border-stone-100">
-                <h2 class="text-xl font-bold text-stone-800 mb-6">Команда</h2>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        <!-- СПИСОК СОТРУДНИКОВ -->
+        <div class="lg:col-span-8 space-y-4">
+            <div class="bg-white p-10 rounded-[3rem] shadow-sm border border-stone-100">
+                <h2 class="text-xl font-black text-stone-900 mb-10 uppercase tracking-widest">Команда</h2>
+
                 <div class="space-y-4">
-                    <div th:each="emp : ${employees}" class="flex items-center justify-between p-4 rounded-2xl border border-transparent hover:border-stone-100 transition hover:bg-stone-50">
-                        <div class="flex items-center space-x-4">
-                            <div class="w-10 h-10 rounded-full bg-stone-100 flex items-center justify-center text-stone-500 font-bold"
-                                 th:text="${emp.email.substring(0,1).toUpperCase()}"></div>
-                            <div>
-                                <div class="flex items-center space-x-2">
-                                    <p class="text-stone-800 font-semibold" th:text="${emp.email}"></p>
-                                    <div th:if="${company.owner != null && emp.id == company.owner.id}" class="relative group">
-                                        <span class="cursor-help text-amber-500">👑</span>
-                                        <div class="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 hidden group-hover:block w-max bg-stone-800 text-white text-[10px] px-2 py-1 rounded shadow-lg z-50">Основатель компании<div class="tooltip-arrow"></div></div>
-                                    </div>
-                                    <div th:if="${emp.canManageEmployees && (company.owner == null || emp.id != company.owner.id)}" class="relative group">
-                                        <span class="cursor-help text-blue-500">🛡️</span>
-                                        <div class="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 hidden group-hover:block w-max bg-stone-800 text-white text-[10px] px-2 py-1 rounded shadow-lg z-50">Имеет права управления<div class="tooltip-arrow"></div></div>
+                    <div th:each="emp : ${employees}" class="p-6 rounded-[2rem] bg-stone-50/40 border border-stone-50 transition-all duration-300">
+
+                        <div class="flex items-center justify-between w-full">
+                            <div class="flex items-center space-x-6 min-w-0 flex-1">
+                                <div class="w-12 h-12 rounded-xl bg-white border border-stone-100 flex items-center justify-center text-[#1E3A8A] font-black flex-shrink-0"
+                                     th:text="${emp.email.substring(0,1).toUpperCase()}"></div>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-lg font-bold text-stone-800 break-all leading-tight pr-4" th:text="${emp.email}"></p>
+                                    <div class="flex items-center space-x-3 mt-1">
+                                        <p class="text-[9px] font-black uppercase tracking-widest text-stone-400" th:text="${emp.role}"></p>
+                                        <span th:if="${company.owner != null && emp.id == company.owner.id}" class="text-[8px] font-black text-amber-600 uppercase">Основатель</span>
+                                        <span th:if="${emp.canManageEmployees && emp.id != company.owner?.id}" class="text-[8px] font-black text-blue-600 uppercase">Администратор</span>
                                     </div>
                                 </div>
-                                <p class="text-[10px] text-stone-400 font-bold uppercase" th:text="${emp.role}"></p>
                             </div>
+
+                            <!-- Кнопка вызова действий -->
+                            <button th:if="${(isOwner || canManage) && emp.id != currentUser.id}"
+                                    th:onclick="'toggleActions(' + ${emp.id} + ')'"
+                                    class="ml-4 p-3 bg-white border border-stone-200 rounded-xl hover:border-[#D4652F] text-stone-400 hover:text-[#D4652F] transition shadow-sm font-black text-[10px] uppercase tracking-widest">
+                                Управлять
+                            </button>
+                            <span th:if="${emp.id == currentUser.id}" class="text-[9px] font-black text-stone-300 uppercase tracking-widest">Вы</span>
                         </div>
 
-                        <!-- ДЕЙСТВИЯ -->
-                        <div class="flex items-center space-x-2">
-                            <div class="relative group" th:if="${isOwner && emp.id != currentUser.id}">
-                                <form th:action="@{/companies/transfer-ownership/{id}(id=${emp.id})}" method="post" onsubmit="return confirm('Передать владение?');">
-                                    <button type="submit" class="text-[10px] bg-amber-600 text-white px-3 py-1.5 rounded-lg font-bold">Отдать Владение</button>
-                                </form>
+                        <!-- СКРЫТАЯ ПАНЕЛЬ ДЕЙСТВИЙ (появляется при клике) -->
+                        <div th:id="'actions-' + ${emp.id}" class="hidden-panel pt-6 mt-6 border-t border-stone-100">
+                            <div class="flex flex-wrap gap-4 items-center">
+
+                                <!-- Сделать владельцем -->
+                                <div class="btn-group" th:if="${isOwner}">
+                                    <form th:action="@{/companies/transfer-ownership/{id}(id=${emp.id})}" method="post" onsubmit="return confirm('Передать права владельца?');">
+                                        <button type="submit" class="action-icon-btn bg-amber-100 text-amber-700 hover:bg-amber-600 hover:text-white">
+                                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                                        </button>
+                                    </form>
+                                    <div class="tooltip">Сделать главным</div>
+                                </div>
+
+                                <!-- Смена роли -->
+                                <div class="btn-group" th:if="${isOwner}">
+                                    <form th:action="@{/companies/employees/{id}/change-role(id=${emp.id})}" method="post" class="flex items-center">
+                                        <select name="newRole" onchange="this.form.submit()" class="action-icon-btn bg-blue-50 text-blue-700 border-none outline-none focus:ring-2 focus:ring-blue-600 cursor-pointer w-32 font-bold text-[10px] uppercase">
+                                            <th:block th:if="${company.type.name() == 'SUPPLIER'}">
+                                                <option th:value="SUPPLIER" th:selected="${emp.role.name() == 'SUPPLIER'}">Менеджер</option>
+                                                <option th:value="ANALYST" th:selected="${emp.role.name() == 'ANALYST'}">Аналитик</option>
+                                            </th:block>
+                                            <th:block th:if="${company.type.name() == 'CUSTOMER'}">
+                                                <option th:value="MANAGER" th:selected="${emp.role.name() == 'MANAGER'}">Закупщик</option>
+                                                <option th:value="ANALYST" th:selected="${emp.role.name() == 'ANALYST'}">Аналитик</option>
+                                            </th:block>
+                                        </select>
+                                    </form>
+                                    <div class="tooltip">Сменить роль</div>
+                                </div>
+
+                                <!-- Права HR -->
+                                <div class="btn-group" th:if="${isOwner}">
+                                    <form th:action="@{/companies/employees/{id}/toggle-permission(id=${emp.id})}" method="post">
+                                        <button type="submit" th:class="${emp.canManageEmployees ? 'bg-blue-600 text-white' : 'bg-white text-blue-600 border border-blue-100'} + ' action-icon-btn'">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.954 0 0112 2.944a11.955 11.954 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                                        </button>
+                                    </form>
+                                    <div class="tooltip" th:text="${emp.canManageEmployees ? 'Забрать права на редактирование' : 'Дать права на редактирование'}"></div>
+                                </div>
+
+                                <!-- Исключить -->
+                                <div class="btn-group ml-auto" th:if="${canManage && (company.owner == null || emp.id != company.owner.id)}">
+                                    <form th:action="@{/companies/employees/{id}/kick(id=${emp.id})}" method="post" onsubmit="return confirm('Удалить сотрудника?');">
+                                        <button type="submit" class="action-icon-btn bg-red-50 text-red-600 hover:bg-red-600 hover:text-white">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                        </button>
+                                    </form>
+                                    <div class="tooltip bg-red-600">Удалить из фирмы</div>
+                                </div>
+
                             </div>
-                            <form th:if="${isOwner && emp.id != currentUser.id}" th:action="@{/companies/employees/{id}/change-role(id=${emp.id})}" method="post" class="flex items-center">
-                                <select name="newRole" onchange="this.form.submit()" class="text-[10px] font-bold uppercase bg-stone-50 border border-stone-100 rounded-lg px-2 py-1.5 focus:ring-1 focus:ring-amber-700 outline-none cursor-pointer">
-                                    <th:block th:if="${company.type.name() == 'SUPPLIER'}">
-                                        <option th:value="SUPPLIER" th:selected="${emp.role.name() == 'SUPPLIER'}">Сотрудник</option>
-                                        <option th:value="ANALYST" th:selected="${emp.role.name() == 'ANALYST'}">Аналитик</option>
-                                    </th:block>
-                                    <th:block th:if="${company.type.name() == 'CUSTOMER'}">
-                                        <option th:value="MANAGER" th:selected="${emp.role.name() == 'MANAGER'}">Менеджер</option>
-                                        <option th:value="ANALYST" th:selected="${emp.role.name() == 'ANALYST'}">Аналитик</option>
-                                    </th:block>
-                                </select>
-                            </form>
-                            <form th:if="${isOwner && emp.id != currentUser.id}" th:action="@{/companies/employees/{id}/toggle-permission(id=${emp.id})}" method="post">
-                                <button type="submit" th:class="${emp.canManageEmployees ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-stone-50 text-stone-400 border-stone-100'} + ' text-[10px] px-3 py-1.5 rounded-lg font-bold border transition'" th:text="${emp.canManageEmployees ? 'Убрать админку' : 'Дать админку'}"></button>
-                            </form>
-                            <form th:if="${canManage && emp.id != currentUser.id && (company.owner == null || emp.id != company.owner.id)}" th:action="@{/companies/employees/{id}/kick(id=${emp.id})}" method="post" onsubmit="return confirm('Исключить?');">
-                                <button type="submit" class="text-[10px] text-red-600 border border-red-100 px-3 py-1.5 rounded-lg font-bold uppercase hover:bg-red-50">Исключить</button>
-                            </form>
-                            <span th:if="${emp.id == currentUser.id}" class="text-[10px] text-stone-300 italic">Это вы</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- ИНФО О КОМПАНИИ И КАРТА -->
-            <div class="bg-white p-8 rounded-3xl shadow-sm border border-stone-100">
-                <h3 class="text-xl font-bold text-stone-800 mb-4 italic">О компании</h3>
-                <p class="text-stone-600 leading-relaxed mb-8" th:text="${company.description != null ? company.description : 'Описание пока не заполнено.'}"></p>
-                <h3 class="text-lg font-bold text-stone-800 mb-4">Наш адрес</h3>
-                <p class="text-stone-400 text-sm mb-6" th:text="${company.address != null ? company.address : 'Адрес не указан'}"></p>
-                <div th:if="${company.address != null}" class="w-full h-80 rounded-2xl overflow-hidden border border-stone-50">
+            <!-- ИНФО О КОМПАНИИ -->
+            <div class="bg-white p-10 rounded-[3rem] shadow-sm border border-stone-100">
+                <h3 class="text-xl font-black text-stone-900 mb-8 uppercase tracking-widest italic">О компании</h3>
+                <p class="text-stone-600 leading-relaxed mb-10 text-lg" th:text="${company.description != null ? company.description : 'Данные не заполнены.'}"></p>
+                <div th:if="${company.address != null}" class="w-full h-96 rounded-[2.5rem] overflow-hidden border-8 border-stone-50 shadow-inner grayscale hover:grayscale-0 transition-all duration-1000">
                     <iframe width="100%" height="100%" frameborder="0" th:src="'https://yandex.ru/map-widget/v1/?text=' + ${company.address}"></iframe>
                 </div>
             </div>
         </div>
 
-        <div class="space-y-6">
-            <!-- СВОДКА -->
-            <div class="bg-white p-8 rounded-3xl shadow-sm border border-stone-100">
-                <h3 class="font-bold text-lg text-stone-800 mb-6 flex items-center italic">📊 Сводка</h3>
-                <div class="space-y-4 mb-8 text-sm">
-                    <div class="flex justify-between border-b border-stone-50 pb-3"><span class="text-stone-400">ID поиска:</span><span class="font-mono font-bold" th:text="${company.id}"></span></div>
-                    <div class="flex justify-between border-b border-stone-50 pb-3"><span class="text-stone-400">Команда:</span><span class="font-bold" th:text="${employees.size()} + ' чел.'"></span></div>
-                    <div class="flex justify-between pb-3"><span class="text-stone-400">Тип:</span><span class="font-bold text-amber-700 uppercase text-xs" th:text="${company.type}"></span></div>
+        <!-- ПРАВАЯ ПАНЕЛЬ -->
+        <div class="lg:col-span-4 space-y-8">
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-stone-100">
+                <h3 class="font-black text-xs uppercase text-stone-400 mb-8 tracking-[0.3em]">Статистика</h3>
+                <div class="space-y-4 mb-10 text-sm font-bold">
+                    <div class="flex justify-between border-b border-stone-50 pb-3"><span class="text-stone-400">ID:</span><span class="font-mono text-[#1E3A8A]" th:text="${company.id}"></span></div>
+                    <div class="flex justify-between border-b border-stone-50 pb-3"><span class="text-stone-400">Штат:</span><span th:text="${employees.size()}"></span></div>
+                    <div class="flex justify-between pb-3"><span class="text-stone-400">Сфера:</span><span class="text-[#D4652F] uppercase text-[10px] tracking-widest" th:text="${company.type}"></span></div>
                 </div>
-                <div class="space-y-3 mb-6">
-                    <a href="/orders/my" class="block w-full text-center py-4 bg-stone-800 text-white rounded-2xl text-sm font-bold hover:bg-black transition shadow-lg shadow-stone-200">
-                        <span th:text="${company.type == T(com.logistics.suppliers.model.CompanyType).SUPPLIER ? '📦 Входящие заказы' : '📑 История закупок'}"></span>
-                    </a>
-                    <a th:if="${company.type == T(com.logistics.suppliers.model.CompanyType).SUPPLIER}" href="/my-products" class="block w-full text-center py-4 bg-white border border-amber-200 text-amber-800 rounded-2xl text-sm font-bold hover:bg-amber-50 transition">🧺 Управление товарами</a>
+                <div class="space-y-3">
+                    <a href="/orders/my" class="block w-full text-center py-5 bg-[#1E3A8A] text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-black transition shadow-xl">Заказы организации</a>
+                    <form th:action="@{/companies/leave}" method="post" onsubmit="return confirm('Покинуть организацию?');">
+                        <button type="submit" class="w-full py-4 text-red-500 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-red-50 rounded-2xl transition">Покинуть ряды</button>
+                    </form>
                 </div>
-                <form th:action="@{/companies/leave}" method="post" onsubmit="return confirm('Покинуть компанию?');">
-                    <button type="submit" class="w-full py-4 border border-red-100 text-red-600 rounded-2xl text-[10px] font-bold hover:bg-red-50 transition uppercase tracking-widest">Покинуть компанию</button>
-                </form>
             </div>
 
             <!-- ЗАЯВКИ -->
-            <div th:if="${canManage}" class="bg-white p-6 rounded-3xl shadow-sm border border-stone-100">
-                <h2 class="text-xl font-bold text-stone-800 mb-4 flex items-center"><span class="mr-2 italic text-amber-600">📩</span> Входящие заявки</h2>
-                <div th:if="${requests == null || requests.isEmpty()}" class="text-center py-6 text-stone-400 text-xs italic">Заявок нет</div>
-                <div th:each="req : ${requests}" class="p-4 border border-amber-100 bg-amber-50/30 rounded-2xl mb-4 text-center">
-                    <p class="text-xs font-bold text-stone-800 mb-3 truncate" th:text="${req.user.email}"></p>
-                    <div class="flex space-x-2">
-                        <form th:action="@{/companies/requests/{id}/approve(id=${req.id})}" method="post" class="flex-1"><button class="w-full py-2 bg-stone-800 text-white text-[10px] font-black uppercase rounded-xl">Ok</button></form>
-                        <form th:action="@{/companies/requests/{id}/reject(id=${req.id})}" method="post" class="flex-1"><button class="w-full py-2 bg-white border border-stone-200 text-stone-400 text-[10px] font-black uppercase rounded-xl">No</button></form>
+            <div th:if="${canManage}" class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-stone-100">
+                <h2 class="text-lg font-black text-stone-900 mb-8 uppercase tracking-widest text-center">Заявки</h2>
+                <div th:if="${requests == null || requests.isEmpty()}" class="py-10 text-center text-stone-400 italic text-xs">Запросов нет</div>
+                <div th:each="req : ${requests}" class="p-6 bg-[#FFF9F8] rounded-[2rem] mb-4 border border-stone-100">
+                    <p class="text-[10px] font-black text-stone-800 mb-4 break-all uppercase text-center" th:text="${req.user.email}"></p>
+                    <div class="flex gap-2">
+                        <form th:action="@{/companies/requests/{id}/approve(id=${req.id})}" method="post" class="flex-1"><button class="w-full py-3 bg-[#1E3A8A] text-white text-[10px] font-black uppercase rounded-xl hover:bg-black transition shadow-sm">OK</button></form>
+                        <form th:action="@{/companies/requests/{id}/reject(id=${req.id})}" method="post" class="flex-1"><button class="w-full py-3 bg-white border border-stone-200 text-stone-400 text-[10px] font-black uppercase rounded-xl hover:bg-stone-100 transition shadow-sm">NO</button></form>
                     </div>
                 </div>
             </div>
@@ -164,26 +196,38 @@
     </div>
 </div>
 
-<!-- МОДАЛЬНОЕ ОКНО НАСТРОЕК -->
-<div id="edit-modal" class="hidden fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-[300] flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-xl p-10 rounded-[3rem] shadow-2xl overflow-y-auto max-h-[90vh]">
-        <h2 class="text-2xl font-black text-stone-900 mb-6">Настройки компании</h2>
-        <form th:action="@{/companies/my/update}" method="post" class="space-y-4">
-            <div><label class="text-[10px] font-black uppercase text-stone-400 ml-2">Название</label><input type="text" name="name" th:value="${company.name}" class="w-full px-5 py-3 bg-stone-50 rounded-2xl border-none focus:ring-2 focus:ring-amber-700 outline-none"></div>
-            <div><label class="text-[10px] font-black uppercase text-stone-400 ml-2">Email компании</label><input type="email" name="contactEmail" th:value="${company.contactEmail}" class="w-full px-5 py-3 bg-stone-50 rounded-2xl border-none focus:ring-2 focus:ring-amber-700 outline-none"></div>
-            <div><label class="text-[10px] font-black uppercase text-stone-400 ml-2">Адрес (для карты)</label><input type="text" name="address" th:value="${company.address}" class="w-full px-5 py-3 bg-stone-50 rounded-2xl border-none focus:ring-2 focus:ring-amber-700 outline-none"></div>
-            <div><label class="text-[10px] font-black uppercase text-stone-400 ml-2">URL логотипа</label><input type="text" name="logoUrl" th:value="${company.logoUrl}" class="w-full px-5 py-3 bg-stone-50 rounded-2xl border-none focus:ring-2 focus:ring-amber-700 outline-none"></div>
-            <div><label class="text-[10px] font-black uppercase text-stone-400 ml-2">Описание</label><textarea name="description" th:text="${company.description}" rows="3" class="w-full px-5 py-3 bg-stone-50 rounded-2xl border-none focus:ring-2 focus:ring-amber-700 outline-none"></textarea></div>
-            <div class="pt-4 flex space-x-3">
-                <button type="button" onclick="document.getElementById('edit-modal').classList.add('hidden')" class="flex-1 py-4 text-stone-400 font-bold uppercase">Отмена</button>
-                <button type="submit" class="flex-1 py-4 bg-stone-900 text-white rounded-2xl font-bold">Сохранить</button>
+<!-- МОДАЛКА НАСТРОЕК -->
+<div id="edit-modal" class="hidden fixed inset-0 bg-[#1E3A8A]/40 backdrop-blur-md z-[300] flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-2xl p-12 rounded-[3.5rem] shadow-2xl overflow-y-auto max-h-[90vh]">
+        <h2 class="text-3xl font-black text-stone-900 mb-10 tracking-tight">Настройки организации</h2>
+        <form th:action="@{/companies/my/update}" method="post" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2"><label class="text-[10px] font-black uppercase text-stone-400 ml-3 tracking-widest">Название</label><input type="text" name="name" th:value="${company.name}" class="w-full px-6 py-4 bg-stone-50 rounded-2xl border-none focus:ring-2 focus:ring-[#D4652F] outline-none font-bold text-stone-800 transition shadow-inner"></div>
+                <div class="space-y-2"><label class="text-[10px] font-black uppercase text-stone-400 ml-3 tracking-widest">Email для контактов</label><input type="email" name="contactEmail" th:value="${company.contactEmail}" class="w-full px-6 py-4 bg-stone-50 rounded-2xl border-none focus:ring-2 focus:ring-[#D4652F] outline-none font-bold text-stone-800 transition shadow-inner"></div>
+            </div>
+            <div class="space-y-2"><label class="text-[10px] font-black uppercase text-stone-400 ml-3 tracking-widest">Юридический адрес</label><input type="text" name="address" th:value="${company.address}" class="w-full px-6 py-4 bg-stone-50 rounded-2xl border-none focus:ring-2 focus:ring-[#D4652F] outline-none font-bold text-stone-800 transition shadow-inner"></div>
+            <div class="space-y-2"><label class="text-[10px] font-black uppercase text-stone-400 ml-3 tracking-widest">Ссылка на логотип</label><input type="text" name="logoUrl" th:value="${company.logoUrl}" class="w-full px-6 py-4 bg-stone-50 rounded-2xl border-none focus:ring-2 focus:ring-[#D4652F] outline-none font-medium text-stone-600 transition shadow-inner"></div>
+            <div class="space-y-2"><label class="text-[10px] font-black uppercase text-stone-400 ml-3 tracking-widest">Краткое описание</label><textarea name="description" th:text="${company.description}" rows="4" class="w-full px-6 py-4 bg-stone-50 rounded-2xl border-none focus:ring-2 focus:ring-[#D4652F] outline-none font-medium text-stone-700 transition shadow-inner"></textarea></div>
+            <div class="pt-8 border-t border-stone-50 flex space-x-4">
+                <button type="button" onclick="document.getElementById('edit-modal').classList.add('hidden')" class="flex-1 py-5 text-stone-400 font-black uppercase tracking-[0.2em] text-[10px]">Закрыть</button>
+                <button type="submit" class="flex-1 py-5 bg-[#D4652F] text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[10px] hover:bg-[#b54d24] transition shadow-xl shadow-orange-900/20">Применить</button>
             </div>
         </form>
     </div>
 </div>
 
 <script>
-    // Убираем уведомление через 4 сек
+    function toggleActions(id) {
+        const panel = document.getElementById('actions-' + id);
+        if (panel.style.display === 'block') {
+            panel.style.display = 'none';
+        } else {
+            // Скрываем все остальные открытые панели для чистоты
+            document.querySelectorAll('.hidden-panel').forEach(p => p.style.display = 'none');
+            panel.style.display = 'block';
+        }
+    }
+
     setTimeout(() => {
         const toast = document.getElementById('toast');
         if(toast) { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }

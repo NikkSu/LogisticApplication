@@ -1,251 +1,251 @@
 <!DOCTYPE html>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title th:text="${product.name} + ' | Logistics Hub'"></title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #FDFBF7; font-family: 'Inter', sans-serif; }
+        body { background-color: #FFF9F8; font-family: 'Inter', sans-serif; }
         .buy-card { position: sticky; top: 100px; }
-        .badge-supplier { background-color: #f5f5f4; color: #44403c; }
-        .price-tag { color: #1c1917; }
-        .btn-cart { background-color: #8B4513; transition: all 0.3s ease; }
-        .btn-cart:hover { background-color: #5D2E0B; transform: scale(1.02); }
-        input::-webkit-outer-spin-button,
-        input::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        input[type=number] {
-            -moz-appearance: textfield;
-        }
-        .similar-card:hover { border-color: #D2B48C; box-shadow: 0 10px 30px rgba(139, 69, 19, 0.05); }
+        .btn-cart { background-color: #1E3A8A; transition: all 0.3s ease; }
+        .btn-cart:hover { background-color: #152c6e; transform: translateY(-2px); }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+        .similar-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .similar-card:hover { border-color: #D4652F; box-shadow: 0 20px 25px -5px rgba(212, 101, 47, 0.1); transform: translateY(-4px); }
     </style>
 </head>
 <body class="pb-20">
 
-<nav class="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-stone-100 py-4 px-8 mb-8">
+<nav class="bg-white/90 backdrop-blur-md sticky top-0 z-50 border-b border-stone-100 py-4 px-8 mb-10 shadow-sm">
     <div class="max-w-7xl mx-auto flex items-center justify-between">
-        <a href="/dashboard" class="group flex items-center text-stone-500 hover:text-amber-800 transition">
-            <svg class="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        <a href="/dashboard" class="group flex items-center text-stone-400 hover:text-[#1E3A8A] transition font-bold text-sm">
+            <svg class="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
             Назад в каталог
         </a>
-        <div class="text-xs font-bold uppercase tracking-widest text-stone-300">Карточка товара</div>
+        <div class="px-4 py-1 bg-stone-100 text-stone-500 rounded-full text-[10px] font-black uppercase tracking-[0.2em]">Карточка товара</div>
     </div>
 </nav>
 
-<div class="max-w-7xl mx-auto px-4">
-    <div class="flex flex-col lg:flex-row gap-12">
+<div class="max-w-7xl mx-auto px-4 lg:px-8">
+    <div class="flex flex-col lg:flex-row gap-12 items-start">
 
+        <!-- ЛЕВАЯ КОЛОНКА: Изображение -->
         <div class="w-full lg:w-3/5">
-            <div class="bg-white rounded-3xl p-4 border border-stone-100 shadow-sm overflow-hidden">
+            <div class="bg-white rounded-[3rem] p-4 border border-stone-100 shadow-sm overflow-hidden flex items-center justify-center min-h-[500px]">
                 <img th:src="${product.imageUrl != null ? product.imageUrl : 'https://via.placeholder.com/800x600?text=No+Image'}"
-                     class="w-full h-[500px] object-contain rounded-2xl" alt="Product Image">
+                     class="max-w-full max-h-[600px] object-contain rounded-[2rem] transition-transform duration-700 hover:scale-105" alt="Product Image">
             </div>
         </div>
 
+        <!-- ПРАВАЯ КОЛОНКА: Инфо и Покупка -->
         <div class="w-full lg:w-2/5 space-y-8">
-            <div class="buy-card space-y-6">
-                <div>
-                    <span class="bg-amber-50 text-amber-800 text-[10px] font-bold uppercase px-3 py-1 rounded-full"
-                          th:text="${product.category != null ? product.category.name : 'Общее'}"></span>
-                    <h1 class="text-4xl font-extrabold text-stone-900 mt-4 leading-tight" th:text="${product.name}"></h1>
+            <div class="buy-card space-y-8">
 
-                    <div class="mt-6">
+                <!-- Заголовок и Продавец -->
+                <div>
+                    <span class="bg-orange-50 text-[#D4652F] text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full border border-orange-100"
+                          th:text="${product.category != null ? product.category.name : 'Без категории'}"></span>
+                    <h1 class="text-4xl font-black text-stone-900 mt-6 leading-tight tracking-tight" th:text="${product.name}"></h1>
+
+                    <div class="mt-8 pt-6 border-t border-stone-100">
                         <a th:href="@{/companies/view/{id}(id=${product.supplier.id})}" class="inline-flex items-center group">
-                            <div class="w-10 h-10 rounded-xl bg-stone-100 flex items-center justify-center mr-3 group-hover:bg-amber-100 transition overflow-hidden border border-stone-100">
-                                <img th:if="${product.supplier.logoUrl != null && !product.supplier.logoUrl.isEmpty()}"
-                                     th:src="${product.supplier.logoUrl}" class="w-full h-full object-cover">
-                                <span th:unless="${product.supplier.logoUrl != null && !product.supplier.logoUrl.isEmpty()}"
-                                      class="text-sm font-bold text-stone-600" th:text="${product.supplier.name.substring(0,1)}"></span>
+                            <div class="w-12 h-12 rounded-2xl bg-stone-50 flex items-center justify-center mr-4 group-hover:bg-amber-50 transition border border-stone-100 overflow-hidden shadow-sm">
+                                <img th:if="${product.supplier.logoUrl != null && !product.supplier.logoUrl.isEmpty()}" th:src="${product.supplier.logoUrl}" class="w-full h-full object-cover">
+                                <span th:unless="${product.supplier.logoUrl != null && !product.supplier.logoUrl.isEmpty()}" class="text-lg font-black text-stone-500 uppercase" th:text="${product.supplier.name.substring(0,1)}"></span>
                             </div>
                             <div class="flex flex-col">
-                                <span class="text-[10px] text-stone-400 uppercase font-bold tracking-tighter"> поставщик:</span>
-                                <span class="text-stone-700 font-bold group-hover:text-amber-800 transition underline decoration-amber-200" th:text="${product.supplier.name}"></span>
+                                <span class="text-[10px] text-stone-400 uppercase font-black tracking-widest mb-1">Поставщик</span>
+                                <span class="text-stone-800 font-bold group-hover:text-[#D4652F] transition text-lg" th:text="${product.supplier.name}"></span>
                             </div>
                         </a>
                     </div>
                 </div>
 
-                <div class="bg-white p-8 rounded-3xl border border-stone-100 shadow-sm space-y-6">
+                <!-- Блок цены и кнопок -->
+                <div class="bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm space-y-8">
                     <div class="flex items-baseline space-x-2">
-                        <span class="text-5xl font-black price-tag" th:text="${#numbers.formatDecimal(product.price, 1, 2) + ' Б'}"></span>
-                        <span class="text-stone-400 text-sm font-medium">/ за ед.</span>
+                        <span class="text-5xl font-black text-[#D4652F] tracking-tighter" th:text="${#numbers.formatDecimal(product.price, 1, 2)}"></span>
+                        <span class="text-2xl font-black text-[#D4652F] mr-2">Б</span>
+                        <span class="text-stone-400 text-sm font-bold uppercase tracking-widest">/ шт.</span>
                     </div>
 
-                    <div th:if="${currentUser.company != null && currentUser.company.type.name() == 'CUSTOMER' && currentUser.role.name() == 'MANAGER'}" class="space-y-4">
+                    <!-- ДЛЯ ПОКУПАТЕЛЯ (CUSTOMER) -->
+                    <div th:if="${currentUser.company != null && currentUser.company.type.name() == 'CUSTOMER' && currentUser.role.name() == 'MANAGER'}" class="space-y-6">
                         <form th:action="@{/cart/add/{id}(id=${product.id})}" method="post" class="space-y-4">
-                            <div class="flex items-center justify-between bg-stone-50 p-2 rounded-2xl border border-stone-100">
-                                <span class="ml-4 text-xs font-bold text-stone-400 uppercase tracking-widest">Количество</span>
+                            <div class="flex items-center justify-between bg-stone-50 p-3 rounded-2xl border border-stone-100">
+                                <span class="ml-4 text-[10px] font-black text-stone-400 uppercase tracking-widest">Количество</span>
                                 <div class="flex items-center">
                                     <input type="number" name="quantity" value="1" min="1"
-                                           class="w-20 bg-transparent border-none focus:ring-0 text-right font-black text-stone-900 text-lg" required>
-                                    <span class="mr-4 ml-2 text-stone-400 text-sm">шт.</span>
+                                           class="w-20 bg-transparent border-none focus:ring-0 text-center font-black text-stone-900 text-xl" required>
+                                    <span class="mr-4 ml-2 text-stone-400 text-xs font-bold uppercase">Шт.</span>
                                 </div>
                             </div>
 
                             <div class="flex items-center space-x-3">
-                                <button type="submit" class="flex-1 btn-cart py-5 rounded-2xl text-white font-bold text-lg shadow-xl shadow-amber-900/20 flex items-center justify-center space-x-2">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
-                                    <span>В корзину</span>
+                                <button type="submit" class="btn-cart flex-1 py-5 rounded-2xl text-white font-black text-sm uppercase tracking-[0.2em] shadow-xl shadow-blue-900/20 flex items-center justify-center space-x-2">
+                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                                    В корзину
                                 </button>
-
-                                <button form="fav-form" type="submit" class="p-5 rounded-2xl bg-stone-50 border border-stone-100 hover:bg-white transition group">
-                                    <svg th:if="${favoriteIds.contains(product.id)}" class="w-6 h-6 text-red-500 fill-current" viewBox="0 0 24 24">
-                                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                                    </svg>
-                                    <svg th:unless="${favoriteIds.contains(product.id)}" class="w-6 h-6 text-stone-300 group-hover:text-red-400 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                                    </svg>
+                                <!-- Кнопка избранного -->
+                                <button form="fav-form" type="submit" class="p-5 rounded-2xl bg-white border-2 border-stone-100 hover:border-red-100 hover:bg-red-50 transition group">
+                                    <svg th:if="${favoriteIds.contains(product.id)}" class="w-6 h-6 text-red-500 fill-current hover:scale-110 transition" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                                    <svg th:unless="${favoriteIds.contains(product.id)}" class="w-6 h-6 text-stone-300 group-hover:text-red-400 hover:scale-110 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                                 </button>
                             </div>
                         </form>
                     </div>
 
+                    <!-- ДЛЯ ПОСТАВЩИКА -->
                     <div th:if="${currentUser.company != null && currentUser.company.type.name() == 'SUPPLIER'}" class="space-y-4">
-                        <div class="bg-amber-50 p-6 rounded-2xl border border-amber-100 text-center relative group">
-                            <p class="text-amber-800 text-sm font-bold uppercase tracking-wider">Вы продавец</p>
-                            <p class="text-amber-600 text-[10px] mt-1 uppercase">Заказ доступен только покупателям</p>
+                        <div class="bg-orange-50 p-6 rounded-2xl border border-orange-100 text-center">
+                            <p class="text-[#D4652F] text-xs font-black uppercase tracking-[0.2em] mb-1">Режим продавца</p>
+                            <p class="text-stone-500 text-[10px] uppercase font-bold">Оформление заказа доступно покупателям</p>
                         </div>
-                        <button form="fav-form" type="submit" class="w-full py-3 rounded-xl border border-stone-100 text-stone-400 text-xs font-bold hover:bg-stone-50 transition flex items-center justify-center space-x-2">
-                            <span th:text="${favoriteIds.contains(product.id) ? ' В избранном' : ' В избранное'}"></span>
+                        <button form="fav-form" type="submit" class="w-full py-4 rounded-2xl border-2 border-stone-100 text-stone-400 text-[10px] font-black uppercase tracking-widest hover:bg-stone-50 hover:text-red-500 transition flex items-center justify-center">
+                            <span th:text="${favoriteIds.contains(product.id) ? '❤️ Убрать из закладок' : '🤍 Добавить в закладки'}"></span>
                         </button>
                     </div>
 
+                    <!-- ДЛЯ ГОСТЯ -->
                     <div th:if="${currentUser.company == null}" class="bg-stone-50 p-6 rounded-2xl border border-stone-200 text-center">
-                        <p class="text-stone-500 text-sm font-bold uppercase">Вступите в компанию</p>
-                        <a href="/companies" class="text-amber-800 text-xs font-bold underline mt-2 block">Выбрать компанию</a>
+                        <p class="text-stone-500 text-xs font-black uppercase tracking-widest mb-2">Требуется организация</p>
+                        <a href="/companies" class="inline-block bg-stone-900 text-white px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-black transition">Выбрать компанию</a>
                     </div>
 
-                    <p class="text-[10px] text-center text-stone-400 uppercase font-bold tracking-tighter">
-                        Цены указаны с учетом НДС (РБ)
+                    <p class="text-[9px] text-center text-stone-300 uppercase font-black tracking-[0.2em]">
+                        Все цены указаны с учетом НДС (РБ)
                     </p>
                 </div>
 
+                <!-- Скрытая форма для избранного -->
                 <form id="fav-form" th:action="@{/favorites/toggle/{id}(id=${product.id})}" method="post" class="hidden"></form>
 
-                <div class="space-y-4">
-                    <h3 class="text-sm font-bold uppercase tracking-widest text-stone-400">Описание</h3>
-                    <p class="text-stone-600 leading-relaxed text-sm bg-white p-6 rounded-2xl border border-stone-50"
-                       th:text="${product.description != null ? product.description : 'Поставщик еще не добавил подробное описание для этого товара.'}">
+                <!-- Описание -->
+                <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-stone-100">
+                    <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 mb-6">Характеристики и описание</h3>
+                    <p class="text-stone-600 leading-relaxed text-sm font-medium"
+                       th:text="${product.description != null ? product.description : 'Поставщик не добавил описание товара.'}">
                     </p>
                 </div>
 
             </div>
         </div>
     </div>
-    <div class="mt-16 bg-white p-8 rounded-3xl border border-stone-100 shadow-sm">
-        <div class="flex items-center justify-between mb-8">
+
+    <!-- МОНИТОРИНГ ЦЕНЫ -->
+    <div class="mt-20 bg-white p-10 rounded-[3rem] border border-stone-100 shadow-sm">
+        <div class="flex items-center justify-between mb-10 border-b border-stone-50 pb-6">
             <div>
-                <h3 class="text-2xl font-black text-stone-900">Мониторинг цены</h3>
-                <p class="text-stone-400 text-sm mt-1">Изменение стоимости за весь период</p>
+                <h3 class="text-3xl font-black text-stone-900 tracking-tight">Аналитика стоимости</h3>
+                <p class="text-stone-400 text-sm mt-2 font-medium">Динамика изменения цены за весь период</p>
             </div>
-            <div class="bg-amber-50 px-4 py-2 rounded-xl">
-                <span class="text-[10px] uppercase font-bold text-amber-800 tracking-widest">Аналитика</span>
+            <div class="hidden sm:block px-6 py-2 bg-blue-50 text-[#1E3A8A] rounded-full text-[10px] font-black uppercase tracking-widest border border-blue-100">
+                Мониторинг
             </div>
         </div>
 
-        <div class="relative h-[300px] w-full">
+        <div class="relative h-[400px] w-full">
             <canvas id="priceChart"></canvas>
         </div>
     </div>
-    <div class="mt-24">
-        <div class="flex items-end justify-between mb-10">
+
+    <!-- ПОХОЖИЕ ТОВАРЫ -->
+    <div class="mt-24 border-t border-stone-100 pt-16">
+        <div class="flex items-end justify-between mb-12">
             <div>
-                <h3 class="text-3xl font-black text-stone-900">Похожие товары</h3>
-                <p class="text-stone-400 mt-2 text-sm">Сравните цены других поставщиков в категории <span class="text-amber-800 font-bold" th:text="${product.category.name}"></span></p>
+                <h3 class="text-4xl font-black text-stone-900 tracking-tight">Сравнение</h3>
+                <p class="text-stone-400 mt-2 font-medium">Аналогичные предложения в категории <span class="text-[#D4652F] font-bold" th:text="${product.category.name}"></span></p>
             </div>
-            <div class="h-px flex-1 bg-stone-100 mx-8 mb-4"></div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div th:each="sim : ${similarProducts}" class="similar-card bg-white p-4 rounded-2xl border border-stone-100 transition-all group">
-                <div class="h-40 bg-stone-50 rounded-xl mb-4 overflow-hidden">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div th:each="sim : ${similarProducts}" class="similar-card bg-white p-6 rounded-[2.5rem] border border-stone-100 flex flex-col group">
+                <div class="h-48 bg-stone-50 rounded-[1.5rem] mb-6 overflow-hidden relative">
                     <img th:src="${sim.imageUrl != null ? sim.imageUrl : 'https://via.placeholder.com/300'}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                    <div class="absolute top-3 left-3 bg-white/90 backdrop-blur px-2 py-1 rounded-lg text-[9px] font-black text-stone-500 uppercase tracking-widest shadow-sm" th:text="${sim.supplier.name}"></div>
                 </div>
 
-                <h4 class="font-bold text-stone-800 mb-1 truncate text-sm" th:text="${sim.name}"></h4>
-                <p class="text-[10px] text-stone-400 font-bold uppercase mb-4" th:text="${sim.supplier.name}"></p>
+                <div class="flex flex-col flex-1">
+                    <h4 class="font-bold text-stone-800 mb-4 text-lg leading-tight group-hover:text-[#D4652F] transition" th:text="${sim.name}"></h4>
 
-                <div class="flex items-center justify-between border-t border-stone-50 pt-4">
-                    <span class="font-black text-stone-900" th:text="${sim.price + ' ₽'}"></span>
+                    <div class="mt-auto border-t border-stone-50 pt-4 space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="font-black text-xl text-stone-900" th:text="${#numbers.formatDecimal(sim.price, 1, 2)} + ' Б'"></span>
 
-                    <div th:if="${sim.price < product.price}" class="bg-green-50 text-green-600 px-2 py-1 rounded-lg text-[10px] font-black">
-                        - <span th:text="${#numbers.formatDecimal(product.price - sim.price, 1, 0)}"></span> ₽
-                    </div>
-                    <div th:if="${sim.price > product.price}" class="bg-stone-50 text-stone-400 px-2 py-1 rounded-lg text-[10px] font-black">
-                        + <span th:text="${#numbers.formatDecimal(sim.price - product.price, 1, 0)}"></span> ₽
+                            <div th:if="${sim.price < product.price}" class="bg-green-50 text-green-700 px-2 py-1 rounded-lg text-[10px] font-black border border-green-100">
+                                - <span th:text="${#numbers.formatDecimal(product.price - sim.price, 1, 0)}"></span> Б
+                            </div>
+                            <div th:if="${sim.price > product.price}" class="bg-red-50 text-red-600 px-2 py-1 rounded-lg text-[10px] font-black border border-red-100">
+                                + <span th:text="${#numbers.formatDecimal(sim.price - product.price, 1, 0)}"></span> Б
+                            </div>
+                            <div th:if="${sim.price == product.price}" class="bg-stone-50 text-stone-400 px-2 py-1 rounded-lg text-[10px] font-black">
+                                =
+                            </div>
+                        </div>
+                        <a th:href="@{/product/{id}(id=${sim.id})}" class="block w-full text-center py-3 text-[10px] font-black text-white bg-stone-900 rounded-xl hover:bg-[#D4652F] transition uppercase tracking-widest shadow-md">
+                            Перейти
+                        </a>
                     </div>
                 </div>
-                <a th:href="@{/product/{id}(id=${sim.id})}" class="block w-full text-center mt-4 py-2 text-[11px] font-bold text-amber-800 bg-amber-50 rounded-lg hover:bg-amber-700 hover:text-white transition uppercase">
-                    Сравнить
-                </a>
             </div>
         </div>
     </div>
 </div>
+
+<!-- СКРИПТ ГРАФИКА -->
 <script th:inline="javascript">
-    const labels = [[${historyLabels}]];
-    const prices = [[${historyPrices}]];
+    Chart.defaults.font.family = 'Inter, sans-serif';
 
-    const ctx = document.getElementById('priceChart').getContext('2d');
+    const labels = /*[[${historyLabels}]]*/ [];
+    const prices = /*[[${historyPrices}]]*/ [];
 
-    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-    gradient.addColorStop(0, 'rgba(139, 69, 19, 0.2)');
-    gradient.addColorStop(1, 'rgba(253, 251, 247, 0)');
+    if (labels && labels.length > 0) {
+        const ctx = document.getElementById('priceChart').getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, 'rgba(30, 58, 138, 0.15)'); // Синий цвет
+        gradient.addColorStop(1, 'rgba(255, 249, 248, 0)');
 
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Цена (₽)',
-                data: prices,
-                borderColor: '#8B4513',
-                borderWidth: 3,
-                backgroundColor: gradient,
-                fill: true,
-                tension: 0.4,
-                pointBackgroundColor: '#8B4513',
-                pointRadius: 4,
-                pointHoverRadius: 6
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    backgroundColor: '#1c1917',
-                    padding: 12,
-                    titleFont: { size: 14 },
-                    bodyFont: { size: 14 },
-                    displayColors: false,
-                    callbacks: {
-                        label: function(context) {
-                            return context.parsed.y + ' ₽';
-                        }
-                    }
-                }
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Стоимость (Б)',
+                    data: prices,
+                    borderColor: '#1E3A8A',
+                    borderWidth: 4,
+                    backgroundColor: gradient,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#D4652F',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 8
+                }]
             },
-            scales: {
-                y: {
-                    beginAtZero: false,
-                    grid: { color: '#f5f5f4' },
-                    ticks: {
-                        callback: value => value + ' ₽',
-                        color: '#a8a29e'
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#1c1917', padding: 14, titleFont: { size: 12 }, bodyFont: { size: 14, weight: 'bold' },
+                        displayColors: false, callbacks: { label: function(context) { return context.parsed.y + ' Б'; } }
                     }
                 },
-                x: {
-                    grid: { display: false },
-                    ticks: { color: '#a8a29e' }
+                scales: {
+                    y: { beginAtZero: false, grid: { color: '#f5f5f4' }, border: { display: false }, ticks: { callback: value => value + ' Б', color: '#a8a29e', font: { weight: 'bold' } } },
+                    x: { grid: { display: false }, border: { display: false }, ticks: { color: '#a8a29e', font: { weight: 'bold' } } }
                 }
             }
-        }
-    });
+        });
+    } else {
+        document.getElementById('priceChart').parentElement.innerHTML = '<div class="flex items-center justify-center h-full text-stone-400 italic font-medium">История изменений цены отсутствует. Товар добавлен недавно.</div>';
+    }
 </script>
 </body>
 </html>
