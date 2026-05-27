@@ -41,7 +41,7 @@ public class AnalyticsService {
                                 .getDisplayName(TextStyle.FULL, new Locale("ru")),
                         LinkedHashMap::new,
                         Collectors.reducing(BigDecimal.ZERO,
-                                order -> order.getTotalPrice() != null ? order.getTotalPrice() : BigDecimal.ZERO, // Защита
+                                order -> order.getTotalPrice() != null ? order.getTotalPrice() : BigDecimal.ZERO,
                                 BigDecimal::add)
                 ));
     }
@@ -91,11 +91,21 @@ public class AnalyticsService {
 
     public Map<String, BigDecimal> getABCAnalysis(Company company) {
         List<Order> orders = getDeliveredOrders(company);
-        return orders.stream()
+
+        Map<String, BigDecimal> productTotals = orders.stream()
                 .flatMap(order -> orderItemRepository.findByOrder(order).stream())
                 .collect(Collectors.groupingBy(
                         item -> item.getProduct().getName(),
                         Collectors.reducing(BigDecimal.ZERO, OrderItem::getRowTotal, BigDecimal::add)
+                ));
+
+        return productTotals.entrySet().stream()
+                .sorted(Map.Entry.<String, BigDecimal>comparingByValue().reversed())
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue,
+                        (e1, e2) -> e1,
+                        LinkedHashMap::new
                 ));
     }
 

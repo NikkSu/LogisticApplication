@@ -62,13 +62,11 @@ public class ProductManagementController {
         return "redirect:/my-products?deleted=true";
     }
 
-    // Показать форму для редактирования
     @GetMapping("/edit/{id}")
     public String editProductForm(@PathVariable Long id, Model model, Authentication authentication) {
         User user = userRepository.findByEmail(authentication.getName()).get();
         Product product = productService.getProductById(id);
 
-        // Проверка прав (только свой товар)
         if (!product.getSupplier().getId().equals(user.getCompany().getId())) {
             return "redirect:/my-products";
         }
@@ -78,7 +76,6 @@ public class ProductManagementController {
         return "supplier/product-form";
     }
 
-    // Новый метод для быстрого создания категории прямо из формы или отдельно
     @PostMapping("/categories/add")
     public String addCategory(@RequestParam String categoryName, RedirectAttributes redirectAttributes) {
         if (categoryName == null || categoryName.trim().isEmpty()) {

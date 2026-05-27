@@ -16,15 +16,15 @@
 </head>
 <body class="flex">
 
-<!-- БОКОВОЕ МЕНЮ (Стиль Logistics Hub) -->
+<!-- БОКОВОЕ МЕНЮ  -->
 <aside class="w-64 h-screen bg-[#1E3A8A] text-white fixed p-8 flex flex-col shadow-2xl">
     <div class="mb-12">
         <h1 class="text-3xl font-extrabold leading-tight">Logistics <br/><span class="text-[#D4652F]">Admin</span></h1>
     </div>
     <nav class="space-y-3 flex-1">
-        <a href="/admin/dashboard" class="block py-3 px-5 bg-[#D4652F] rounded-2xl text-sm font-bold text-white shadow-lg shadow-[#D4652F]/30 transition-transform hover:scale-105">📊 Обзор системы</a>
-        <a href="/admin/companies" class="block py-3 px-5 hover:bg-white/10 rounded-2xl text-sm text-blue-100 transition font-medium">🏢 Реестр компаний</a>
-        <a href="/admin/categories" class="block py-3 px-5 hover:bg-white/10 rounded-2xl text-sm text-blue-100 transition font-medium">🏷️ Классификатор</a>
+        <a href="/admin/dashboard" class="block py-3 px-5 bg-[#D4652F] rounded-2xl text-sm font-bold text-white shadow-lg shadow-[#D4652F]/30 transition-transform hover:scale-105"> Обзор системы</a>
+        <a href="/admin/companies" class="block py-3 px-5 hover:bg-white/10 rounded-2xl text-sm text-blue-100 transition font-medium"> Реестр компаний</a>
+        <a href="/admin/categories" class="block py-3 px-5 hover:bg-white/10 rounded-2xl text-sm text-blue-100 transition font-medium"> Классификатор</a>
     </nav>
     <div class="pt-8 border-t border-blue-800/50">
         <form th:action="@{/logout}" method="post">
