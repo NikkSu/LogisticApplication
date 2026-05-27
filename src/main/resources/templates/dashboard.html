@@ -28,7 +28,7 @@
         <div class="flex items-center space-x-4 flex-shrink-0">
             <a href="/companies" class="text-stone-600 hover:text-amber-800 font-medium text-sm">Компании</a>
 
-            <a th:if="${currentUser.company != null && currentUser.company.type.name() == 'CUSTOMER' && currentUser.role.name() == 'MANAGER'}"
+            <a th:if="${currentUser.company != null && currentUser.company.type.name() == 'SUPPLIER'}"
                href="/my-products"
                class="text-amber-800 font-bold text-sm bg-amber-50 px-3 py-1 rounded-lg hover:bg-amber-100 transition">
                 Мои товары

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Классификатор | Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="flex">
+
+<!-- БОКОВОЕ МЕНЮ -->
+<aside class="w-64 h-screen bg-stone-900 text-white fixed p-6 flex flex-col">
+    <h1 class="text-xl font-black mb-10 text-amber-500 italic text-center border-b border-stone-800 pb-4">Logistics Admin</h1>
+    <nav class="space-y-2 flex-1">
+        <a href="/admin/dashboard" class="block py-3 px-4 hover:bg-stone-800 rounded-xl text-sm text-stone-400 transition font-medium">📊 Обзор системы</a>
+        <a href="/admin/companies" class="block py-3 px-4 hover:bg-stone-800 rounded-xl text-sm text-stone-400 transition font-medium">🏢 Реестр компаний</a>
+        <a href="/admin/categories" class="block py-3 px-4 bg-amber-700 rounded-xl text-sm font-bold text-white shadow-lg">🏷️ Классификатор</a>
+    </nav>
+
+    <div class="pt-6 border-t border-stone-800">
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="w-full text-left py-3 px-4 text-red-400 text-xs font-bold uppercase hover:text-red-300 transition">Выйти из системы</button>
+        </form>
+    </div>
+</aside>
+
+<!-- КОНТЕНТ -->
+<main class="ml-64 p-10 w-full">
+    <header class="mb-12">
+        <h2 class="text-3xl font-black text-stone-800 leading-tight">Классификатор товаров</h2>
+        <p class="text-stone-400 mt-1">Управление глобальным списком категорий для всех поставщиков</p>
+    </header>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
+        <!-- ФОРМА (Слева) -->
+        <div class="bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm">
+            <h3 class="font-black text-stone-800 mb-6 text-sm uppercase tracking-widest">Новая категория</h3>
+            <form th:action="@{/admin/categories/save}" method="post" class="space-y-5">
+                <input type="text" name="name" placeholder="Название (напр. Оргтехника)" required
+                       class="w-full px-5 py-4 bg-stone-50 rounded-2xl border-none focus:ring-2 focus:ring-amber-500 outline-none transition font-medium">
+                <button type="submit" class="w-full py-4 bg-stone-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-black transition shadow-lg shadow-stone-200">
+                    Добавить в систему
+                </button>
+            </form>
+        </div>
+
+        <!-- ТАБЛИЦА (Справа) -->
+        <div class="lg:col-span-2 bg-white rounded-[2.5rem] border border-stone-100 shadow-sm overflow-hidden">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-stone-50 text-stone-400 text-[10px] font-black uppercase tracking-widest">
+                <tr>
+                    <th class="px-8 py-5">Наименование</th>
+                    <th class="px-8 py-5 text-right">Управление</th>
+                </tr>
+                </thead>
+                <tbody class="divide-y divide-stone-100">
+                <tr th:each="cat : ${categories}" class="hover:bg-stone-50/50 transition">
+                    <td class="px-8 py-5 font-bold text-stone-700" th:text="${cat.name}"></td>
+                    <td class="px-8 py-5 text-right">
+                        <form th:action="@{/admin/categories/delete/{id}(id=${cat.id})}" method="post"
+                              onsubmit="return confirm('При удалении категории все связанные товары останутся без категории. Продолжить?');">
+                            <button type="submit" class="text-red-400 hover:text-red-600 font-black text-[10px] uppercase tracking-widest transition">
+                                Удалить
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <!-- Если категорий нет -->
+            <div th:if="${categories.isEmpty()}" class="py-20 text-center text-stone-400 italic">
+                Список категорий пуст
+            </div>
+        </div>
+    </div>
+</main>
+
+</body>
+</html>

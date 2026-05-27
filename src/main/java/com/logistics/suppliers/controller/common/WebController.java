@@ -128,6 +128,10 @@ public class WebController {
         boolean isOwner = company != null && company.getOwner() != null &&
                 company.getOwner().getId().equals(currentUser.getId());
 
+        if (currentUser.getRole() == Role.ADMIN) {
+            return "redirect:/admin/dashboard";
+        }
+
         if (currentUser.getCompany() != null && currentUser.getCompany().getType() == CompanyType.CUSTOMER) {
             List<CartItem> cartItems = cartService.getCartForCompany(currentUser.getCompany());
             int cartSize = cartItems.stream().mapToInt(CartItem::getQuantity).sum();

@@ -281,4 +281,29 @@ public class CompanyController {
 
         return "redirect:/companies/my";
     }
+
+    @PostMapping("/my/update")
+    public String updateCompanyDetails(@ModelAttribute Company companyData,
+                                       Authentication authentication,
+                                       RedirectAttributes redirectAttributes) {
+        User currentUser = userRepository.findByEmail(authentication.getName()).get();
+        Company company = currentUser.getCompany();
+        
+        boolean canManage = company.getOwner() != null && company.getOwner().getId().equals(currentUser.getId())
+                || currentUser.isCanManageEmployees();
+
+        if (canManage) {
+            company.setName(companyData.getName());
+            company.setDescription(companyData.getDescription());
+            company.setAddress(companyData.getAddress());
+            company.setContactEmail(companyData.getContactEmail());
+            company.setLogoUrl(companyData.getLogoUrl());
+
+            companyRepository.save(company);
+            redirectAttributes.addFlashAttribute("message", "Данные компании обновлены!");
+            redirectAttributes.addFlashAttribute("messageType", "success");
+        }
+
+        return "redirect:/companies/my";
+    }
 }

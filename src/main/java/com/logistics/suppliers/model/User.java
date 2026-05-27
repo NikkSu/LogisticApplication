@@ -45,5 +45,7 @@ public class User {
     @Column(length = 400)
     private String avatarUrl;
 
+    private LocalDateTime createdAt = LocalDateTime.now();
+
     private boolean canManageEmployees = false;
 }
