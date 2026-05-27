@@ -4,69 +4,134 @@
     <meta charset="UTF-8">
     <title>Регистрация компании | Logistics Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #FDFBF7; }
-        .form-card { background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        .btn-submit { background-color: #8B4513; color: white; transition: 0.3s; }
-        .btn-submit:hover { background-color: #5D2E0B; }
+        body { background-color: #FFF9F8; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        .blob { position: absolute; z-index: -1; filter: blur(80px); opacity: 0.4; border-radius: 50%; }
+        .input-focus:focus { border-color: #D4652F; box-shadow: 0 0 0 4px rgba(212, 101, 47, 0.1); }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen">
+<body class="flex items-center justify-center min-h-screen relative py-10 px-4">
 
-<div class="form-card p-10 w-full max-w-lg">
-    <div class="mb-8 text-center">
-        <h2 class="text-3xl font-bold text-stone-800">Новая компания</h2>
-        <p class="text-stone-500 mt-2">Зарегистрируйте свой бизнес в системе</p>
+<!-- Декор фона -->
+<div class="blob w-96 h-96 bg-[#D4652F] -bottom-20 -left-20"></div>
+<div class="blob w-80 h-80 bg-[#1E3A8A] -top-20 -right-20"></div>
+
+<div class="w-full max-w-6xl flex flex-col lg:flex-row bg-white rounded-[3rem] shadow-2xl shadow-stone-200/50 overflow-hidden relative z-10">
+
+    <!-- ЛЕВАЯ ПАНЕЛЬ: Инфо блок -->
+    <div class="hidden lg:flex flex-col justify-between p-16 bg-[#1E3A8A] text-white w-5/12 relative overflow-hidden">
+        <div class="relative z-10">
+            <a href="/companies" class="inline-flex items-center text-blue-200 hover:text-white transition text-xs font-black uppercase tracking-widest mb-16">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                Вернуться к списку
+            </a>
+
+            <h1 class="text-5xl font-black mb-6 leading-tight">Создайте свой <br/><span class="text-[#D4652F]">Бизнес</span></h1>
+            <p class="text-blue-100 text-lg opacity-80 leading-relaxed mb-12">
+                Откройте новые возможности автоматизации закупок и продаж на платформе Logistics Hub.
+            </p>
+
+            <div class="space-y-6">
+                <div class="flex items-start space-x-4">
+                    <div class="w-8 h-8 rounded-full bg-[#D4652F] flex items-center justify-center font-black text-sm flex-shrink-0 mt-1">1</div>
+                    <div>
+                        <h4 class="font-black text-white">Статус Владельца</h4>
+                        <p class="text-xs text-blue-200 mt-1">Полный контроль над компанией и сотрудниками.</p>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-4">
+                    <div class="w-8 h-8 rounded-full bg-blue-800 flex items-center justify-center font-black text-sm flex-shrink-0 mt-1">2</div>
+                    <div>
+                        <h4 class="font-black text-white">Мощная аналитика</h4>
+                        <p class="text-xs text-blue-200 mt-1">Отслеживание продаж и автоматический контроль бюджета.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Абстрактный узор -->
+        <div class="absolute top-0 right-0 w-full h-full opacity-10 pointer-events-none scale-150">
+            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><path fill="#FFFFFF" d="M44.7,-76.4C58.1,-69.2,69.2,-57.1,76.5,-43.1C83.8,-29.1,87.4,-13.2,85.2,1.8C83,16.8,75,30.8,65.1,43.2C55.2,55.6,43.4,66.4,29.7,72.4C16,78.5,0.4,79.8,-15.4,76.5C-31.1,73.1,-47.1,65.1,-59.4,52.8C-71.7,40.5,-80.4,24,-82.9,6.5C-85.4,-11,-81.7,-29.4,-72,-44.6C-62.3,-59.8,-46.6,-71.8,-30.9,-77.8C-15.3,-83.8,0.3,-83.8,15.6,-81.5C30.9,-79.2,44.7,-76.4,44.7,-76.4Z" transform="translate(100 100)" /></svg>
+        </div>
     </div>
 
-    <form th:action="@{/companies/create}" th:object="${company}" method="post" class="space-y-6">
-        <div>
-            <label class="block text-sm font-bold text-stone-700 mb-2">Название компании</label>
-            <input type="text" th:field="*{name}" required
-                   class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:border-amber-700"
-                   placeholder="Например: ООО Вектра">
+    <!-- ПРАВАЯ ПАНЕЛЬ: Форма -->
+    <div class="p-8 md:p-12 lg:p-16 w-full lg:w-7/12 flex flex-col justify-center bg-white">
+        <div class="mb-10 text-center lg:text-left block lg:hidden">
+            <a href="/companies" class="text-stone-400 hover:text-stone-800 text-xs font-black uppercase tracking-widest inline-flex items-center mb-6">← Назад</a>
         </div>
 
-        <div>
-            <label class="block text-sm font-bold text-stone-700 mb-2">Тип деятельности</label>
-            <select th:field="*{type}" class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:border-amber-700">
-                <option th:value="SUPPLIER">Поставщик (продажа товаров)</option>
-                <option th:value="CUSTOMER">Заказчик (закупка товаров)</option>
-            </select>
-        </div>
-        <div>
-            <label class="block text-sm font-bold text-stone-700 mb-2">Email компании для связи</label>
-            <input type="email" th:field="*{contactEmail}" required
-                   class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:border-amber-700"
-                   placeholder="office@company.com">
+        <div class="mb-10">
+            <h2 class="text-3xl font-black text-stone-900 mb-2 tracking-tight">Регистрация организации</h2>
+            <p class="text-stone-400 text-sm font-medium">Заполните данные для создания профиля компании</p>
         </div>
 
-        <div>
-            <label class="block text-sm font-bold text-stone-700 mb-2">Юридический адрес (для карты)</label>
-            <input type="text" th:field="*{address}" required
-                   class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:border-amber-700"
-                   placeholder="Москва, ул. Ленина, д. 1">
-        </div>
+        <form th:action="@{/companies/create}" th:object="${company}" method="post" class="space-y-8">
 
-        <div>
-            <label class="block text-sm font-bold text-stone-700 mb-2">О компании</label>
-            <textarea th:field="*{description}" rows="4"
-                      class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:border-amber-700"
-                      placeholder="Расскажите о вашей деятельности..."></textarea>
-        </div>
-        <div>
-            <label class="block text-sm font-bold text-stone-700 mb-2">Ссылка на логотип (URL)</label>
-            <input type="text" th:field="*{logoUrl}"
-                   class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:outline-none focus:border-amber-700"
-                   placeholder="https://example.com/logo.png">
-        </div>
+            <!-- Базовые данные (Грид) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-black uppercase text-stone-400 tracking-widest ml-2">Название компании <span class="text-red-500">*</span></label>
+                    <input type="text" th:field="*{name}" required placeholder="Например: ООО Вектра"
+                           class="w-full px-6 py-4 bg-stone-50 border-2 border-transparent rounded-2xl outline-none input-focus transition-all font-bold text-stone-800" />
+                </div>
 
-        <button type="submit" class="btn-submit w-full py-4 rounded-xl font-bold text-lg shadow-lg shadow-amber-900/20 mt-4">
-            Создать компанию
-        </button>
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-black uppercase text-stone-400 tracking-widest ml-2">Сфера деятельности <span class="text-red-500">*</span></label>
+                    <select th:field="*{type}" class="w-full px-6 py-4 bg-stone-50 border-2 border-transparent rounded-2xl outline-none input-focus transition-all font-bold text-stone-800 cursor-pointer appearance-none">
+                        <option th:value="SUPPLIER">Поставщик (Продажи)</option>
+                        <option th:value="CUSTOMER">Заказчик (Закупки)</option>
+                    </select>
+                </div>
+            </div>
 
-        <a href="/companies" class="block text-center text-sm text-stone-400 hover:text-stone-600">Отмена</a>
-    </form>
+            <!-- Контакты и Карта -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-stone-50">
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-black uppercase text-stone-400 tracking-widest ml-2">Контактный Email <span class="text-red-500">*</span></label>
+                    <input type="email" th:field="*{contactEmail}" required placeholder="office@company.com"
+                           class="w-full px-6 py-4 bg-stone-50 border-2 border-transparent rounded-2xl outline-none input-focus transition-all font-medium text-stone-800" />
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-black uppercase text-stone-400 tracking-widest ml-2">Физический адрес</label>
+                    <input type="text" th:field="*{address}" placeholder="Минск, пр. Мира 5"
+                           class="w-full px-6 py-4 bg-stone-50 border-2 border-transparent rounded-2xl outline-none input-focus transition-all font-medium text-stone-800" />
+                </div>
+            </div>
+
+            <!-- Брендинг и Описание -->
+            <div class="pt-6 border-t border-stone-50 space-y-6">
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-black uppercase text-stone-400 tracking-widest ml-2 flex items-center justify-between">
+                        <span>URL Логотипа</span>
+                        <span class="text-[8px] text-stone-300">ОПЦИОНАЛЬНО</span>
+                    </label>
+                    <input type="text" th:field="*{logoUrl}" placeholder="https://..."
+                           class="w-full px-6 py-4 bg-stone-50 border-2 border-transparent rounded-2xl outline-none input-focus transition-all font-medium text-stone-600 text-sm" />
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-[10px] font-black uppercase text-stone-400 tracking-widest ml-2 flex items-center justify-between">
+                        <span>Краткое описание деятельности</span>
+                        <span class="text-[8px] text-stone-300">ДЛЯ ПРОФИЛЯ КОМПАНИИ</span>
+                    </label>
+                    <textarea th:field="*{description}" rows="3" placeholder="Расскажите, чем занимается ваша компания..."
+                              class="w-full px-6 py-4 bg-stone-50 border-2 border-transparent rounded-2xl outline-none input-focus transition-all font-medium text-stone-700"></textarea>
+                </div>
+            </div>
+
+            <div class="pt-8">
+                <button type="submit" class="w-full py-5 bg-[#D4652F] hover:bg-[#b54d24] text-white rounded-2xl font-black text-sm uppercase tracking-[0.2em] transition-all transform hover:-translate-y-1 shadow-xl shadow-orange-900/20">
+                    Зарегистрировать компанию
+                </button>
+                <p class="text-[9px] text-center text-stone-400 mt-4 uppercase font-black tracking-widest">
+                    Нажимая кнопку, вы подтверждаете статус владельца бизнеса
+                </p>
+            </div>
+        </form>
+    </div>
 </div>
 
 </body>

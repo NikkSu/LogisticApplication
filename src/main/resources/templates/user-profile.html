@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <title>Мой профиль | Logistics Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #FDFBF7; font-family: 'Inter', sans-serif; }
-        .product-card { transition: all 0.3s ease; }
-        .product-card:hover { transform: translateY(-5px); border-color: #D2B48C; }
+        body { background-color: #FFF9F8; font-family: 'Inter', sans-serif; }
+        .product-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .product-card:hover { transform: translateY(-5px); border-color: #D4652F; box-shadow: 0 20px 25px -5px rgba(212, 101, 47, 0.15); }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
@@ -15,69 +16,87 @@
 
 <div class="max-w-7xl mx-auto px-4 lg:px-8">
 
+    <!-- НАВИГАЦИЯ -->
     <nav class="mb-10 flex justify-between items-center">
-        <a href="/dashboard" class="group flex items-center text-stone-400 hover:text-stone-800 transition">
-            <svg class="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        <a href="/dashboard" class="group flex items-center text-stone-400 hover:text-[#1E3A8A] transition font-bold text-sm">
+            <svg class="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
             Вернуться на витрину
         </a>
         <form th:action="@{/logout}" method="post">
-            <button type="submit" class="bg-red-50 text-red-600 px-6 py-2 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition">
-                Выйти
+            <button type="submit" class="bg-red-50 text-red-600 px-6 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition shadow-sm">
+                Завершить сеанс
             </button>
         </form>
     </nav>
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
+        <!-- ЛЕВАЯ КОЛОНКА (Инфо и Аватар) -->
         <div class="lg:col-span-4 xl:col-span-3 space-y-6">
-            <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-stone-100 text-center">
-                <div class="relative mx-auto w-32 h-32 mb-6">
+
+            <!-- Карточка пользователя -->
+            <div class="bg-white p-8 rounded-[3rem] shadow-sm border border-stone-100 text-center relative overflow-hidden">
+                <!-- Декоративный фон за аватаркой -->
+                <div class="absolute top-0 left-0 w-full h-32 bg-gradient-to-br from-[#1E3A8A] to-blue-800 rounded-t-[3rem]"></div>
+
+                <!-- АВАТАРКА -->
+                <div class="relative group mx-auto w-32 h-32 mb-6 mt-10">
                     <img th:if="${user.avatarUrl != null && !user.avatarUrl.isEmpty()}"
                          th:src="${user.avatarUrl}"
-                         class="w-full h-full rounded-full object-cover border-4 border-white shadow-xl">
+                         class="w-full h-full rounded-[2rem] object-cover border-4 border-white shadow-xl bg-white relative z-10">
+
                     <div th:unless="${user.avatarUrl != null && !user.avatarUrl.isEmpty()}"
-                         class="w-full h-full bg-amber-100 text-amber-800 rounded-full flex items-center justify-center text-4xl font-black border-4 border-white shadow-md"
+                         class="w-full h-full bg-white text-[#1E3A8A] rounded-[2rem] flex items-center justify-center text-5xl font-black border-4 border-white shadow-xl relative z-10"
                          th:text="${user.email.substring(0,1).toUpperCase()}">
                     </div>
                 </div>
 
-                <h2 class="text-xl font-black text-stone-800 leading-tight break-words px-2"
+                <h2 class="text-2xl font-black text-stone-900 leading-tight break-words px-2"
                     th:text="${user.firstName != null ? user.firstName + ' ' + user.lastName : 'Пользователь'}"></h2>
-                <p class="text-stone-400 text-sm mt-2 mb-8 truncate" th:text="${user.email}"></p>
+                <p class="text-stone-400 text-sm mt-1 mb-8 truncate font-medium" th:text="${user.email}"></p>
 
-                <form th:action="@{/profile/update-avatar}" method="post" class="space-y-2">
-                    <input type="text" name="avatarUrl" th:value="${user.avatarUrl}"
-                           placeholder="URL фотографии"
-                           class="w-full text-[10px] px-4 py-2 bg-stone-50 border border-stone-100 rounded-xl focus:outline-none focus:ring-1 focus:ring-amber-700">
-                    <button type="submit" class="text-[10px] font-black uppercase tracking-widest text-stone-400 hover:text-stone-800 transition">Сменить фото</button>
+                <!-- Форма обновления фото -->
+                <form th:action="@{/profile/update-avatar}" method="post" class="space-y-3 pt-6 border-t border-stone-50">
+                    <input type="text" name="avatarUrl" th:value="${user.avatarUrl}" placeholder="Вставьте ссылку на фото"
+                           class="w-full text-xs font-bold px-4 py-3 bg-stone-50 border-2 border-transparent rounded-xl focus:outline-none focus:border-[#D4652F] transition text-center text-stone-600">
+                    <button type="submit" class="w-full py-3 text-[10px] text-stone-400 bg-white border border-stone-200 rounded-xl hover:text-white hover:bg-stone-800 uppercase font-black tracking-widest transition shadow-sm">
+                        Обновить аватар
+                    </button>
                 </form>
             </div>
 
-            <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-stone-100">
-                <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 mb-8">Ваша активность</h3>
-                <div class="space-y-8">
+            <!-- СТАТИСТИКА АКТИВНОСТИ -->
+            <div class="bg-[#1E3A8A] p-8 rounded-[3rem] shadow-xl text-white relative overflow-hidden">
+                <div class="absolute -right-4 -bottom-4 text-white/5 text-8xl font-black italic pointer-events-none">DATA</div>
+
+                <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-300 mb-8 relative z-10">Ваша активность</h3>
+
+                <div class="space-y-8 relative z-10">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-xs font-bold text-stone-400 uppercase tracking-tighter">Заказов</p>
-                            <p class="text-3xl font-black text-stone-800" th:text="${orderCount}">0</p>
+                            <p class="text-[10px] font-black uppercase tracking-widest text-blue-200">Заказов оформлено</p>
+                            <p class="text-4xl font-black text-white" th:text="${orderCount}">0</p>
                         </div>
-                        <div class="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600 text-xl">📦</div>
+                        <div class="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-2xl shadow-inner border border-white/10">📦</div>
                     </div>
-                    <div class="flex items-center justify-between pt-6 border-t border-stone-50">
+
+                    <div class="flex items-center justify-between pt-6 border-t border-blue-800/50">
                         <div>
-                            <p class="text-xs font-bold text-stone-400 uppercase tracking-tighter">В избранном</p>
-                            <p class="text-3xl font-black text-stone-800" th:text="${favoriteCount}">0</p>
+                            <p class="text-[10px] font-black uppercase tracking-widest text-blue-200">Товаров в избранном</p>
+                            <p class="text-4xl font-black text-[#D4652F]" th:text="${favoriteCount}">0</p>
                         </div>
-                        <div class="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center text-red-500 text-xl">❤️</div>
+                        <div class="w-12 h-12 bg-[#D4652F]/20 rounded-2xl flex items-center justify-center text-2xl shadow-inner border border-[#D4652F]/30">❤️</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="lg:col-span-8 xl:col-span-9 bg-white p-10 rounded-[2.5rem] shadow-sm border border-stone-100">
-            <div class="flex items-center justify-between mb-12">
-                <h2 class="text-3xl font-black text-stone-900">Настройки</h2>
-                <div class="flex items-center space-x-2 bg-stone-50 px-4 py-2 rounded-full border border-stone-100">
+        <!-- ПРАВАЯ КОЛОНКА (Настройки) -->
+        <div class="lg:col-span-8 xl:col-span-9 bg-white p-12 rounded-[3rem] shadow-sm border border-stone-100">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-12 gap-4">
+                <h2 class="text-4xl font-black text-stone-900 tracking-tight">Настройки профиля</h2>
+
+                <div class="flex items-center space-x-2 bg-stone-50 px-4 py-2 rounded-full border border-stone-100 shadow-sm">
                     <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                     <span class="text-[10px] font-black uppercase text-stone-500 tracking-widest" th:text="${user.role}">Роль</span>
                 </div>
@@ -85,27 +104,31 @@
 
             <form th:action="@{/profile/update}" method="post" class="space-y-8">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="space-y-3">
-                        <label class="text-[10px] font-black uppercase text-stone-400 tracking-widest ml-1">Ваше имя</label>
-                        <input type="text" name="firstName" th:value="${user.firstName}" class="w-full px-6 py-4 rounded-2xl bg-stone-50 border-none focus:ring-2 focus:ring-amber-700 transition font-medium">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase text-stone-400 tracking-widest ml-2">Ваше имя</label>
+                        <input type="text" name="firstName" th:value="${user.firstName}"
+                               class="w-full px-6 py-4 rounded-2xl bg-stone-50 border-2 border-transparent focus:outline-none focus:border-[#D4652F] transition font-bold text-stone-800 shadow-inner">
                     </div>
-                    <div class="space-y-3">
-                        <label class="text-[10px] font-black uppercase text-stone-400 tracking-widest ml-1">Фамилия</label>
-                        <input type="text" name="lastName" th:value="${user.lastName}" class="w-full px-6 py-4 rounded-2xl bg-stone-50 border-none focus:ring-2 focus:ring-amber-700 transition font-medium">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-black uppercase text-stone-400 tracking-widest ml-2">Фамилия</label>
+                        <input type="text" name="lastName" th:value="${user.lastName}"
+                               class="w-full px-6 py-4 rounded-2xl bg-stone-50 border-2 border-transparent focus:outline-none focus:border-[#D4652F] transition font-bold text-stone-800 shadow-inner">
                     </div>
                 </div>
 
-                <div class="space-y-3">
-                    <label class="text-[10px] font-black uppercase text-stone-400 tracking-widest ml-1">Телефон для связи</label>
-                    <input type="text" name="phone" th:value="${user.phone}" placeholder="+375 (__) ___-__-__" class="w-full px-6 py-4 rounded-2xl bg-stone-50 border-none focus:ring-2 focus:ring-amber-700 transition font-medium">
+                <div class="space-y-2">
+                    <label class="text-[10px] font-black uppercase text-stone-400 tracking-widest ml-2">Контактный телефон</label>
+                    <input type="text" name="phone" th:value="${user.phone}" placeholder="+375 (__) ___-__-__"
+                           class="w-full px-6 py-4 rounded-2xl bg-stone-50 border-2 border-transparent focus:outline-none focus:border-[#D4652F] transition font-bold text-stone-800 shadow-inner">
                 </div>
 
                 <div class="pt-10 border-t border-stone-50 flex flex-col sm:flex-row items-center justify-between gap-6">
-                    <button type="submit" class="w-full sm:w-auto bg-stone-800 text-white px-12 py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-amber-800 transition shadow-xl shadow-amber-900/10">
+                    <button type="submit" class="w-full sm:w-auto bg-[#1E3A8A] text-white px-12 py-4 rounded-[1.5rem] font-black text-sm uppercase tracking-[0.2em] hover:bg-[#152c6e] transition shadow-xl shadow-blue-900/20">
                         Сохранить изменения
                     </button>
-                    <a href="/profile/change-password" class="text-sm font-bold text-amber-800 hover:text-stone-800 transition flex items-center">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+
+                    <a href="/profile/change-password" class="text-sm font-bold text-[#D4652F] hover:text-[#b54d24] transition flex items-center group">
+                        <svg class="w-5 h-5 mr-2 transform group-hover:-translate-y-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                         Изменить пароль
                     </a>
                 </div>
@@ -113,43 +136,51 @@
         </div>
     </div>
 
-    <div class="mt-20 border-t border-stone-100 pt-16 mb-20">
+    <!-- ИЗБРАННОЕ (Закладки) -->
+    <div class="mt-24 border-t border-stone-200 pt-16 mb-20">
         <div class="flex items-center justify-between mb-12">
             <div>
-                <h3 class="text-4xl font-black text-stone-900 italic">Закладки</h3>
-                <p class="text-stone-400 mt-2">Товары, которые вы сохранили для быстрого доступа</p>
+                <h3 class="text-4xl font-black text-stone-900 tracking-tight">Ваши закладки</h3>
+                <p class="text-stone-500 mt-2 font-medium">Товары, сохраненные для быстрого доступа и оформления</p>
             </div>
-            <span class="bg-amber-50 text-amber-800 px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest"
-                  th:text="${favoriteCount + ' товаров'}"></span>
+            <span class="bg-orange-50 text-[#D4652F] px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm border border-orange-100"
+                  th:text="${favoriteCount + ' позиций'}"></span>
         </div>
 
+        <!-- СЕТКА ИЗБРАННОГО -->
         <div th:if="${!favoriteProducts.isEmpty()}" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            <div th:each="product : ${favoriteProducts}" class="product-card bg-white rounded-[2.5rem] border border-stone-100 overflow-hidden shadow-sm hover:shadow-xl flex flex-col">
+            <div th:each="product : ${favoriteProducts}" class="product-card bg-white rounded-[2.5rem] border border-stone-100 overflow-hidden shadow-sm flex flex-col group">
+
                 <a th:href="@{/product/{id}(id=${product.id})}" class="relative block overflow-hidden aspect-square bg-stone-50">
                     <img th:src="${product.imageUrl != null ? product.imageUrl : 'https://via.placeholder.com/400'}"
-                         class="w-full h-full object-cover transition-transform duration-500 hover:scale-110">
-                    <div class="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-black text-stone-500 shadow-sm"
-                         th:text="${product.supplier.name}"></div>
+                         class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                    <div class="absolute top-4 left-4 flex items-center bg-white/90 backdrop-blur px-2 py-1.5 rounded-xl shadow-sm border border-white">
+                        <span class="text-[10px] font-black text-stone-600 uppercase tracking-tighter truncate max-w-[100px]" th:text="${product.supplier.name}"></span>
+                    </div>
                 </a>
 
                 <div class="p-6 flex flex-col flex-1">
-                    <div class="flex justify-between items-start mb-4">
+                    <div class="flex justify-between items-start mb-4 gap-4">
                         <a th:href="@{/product/{id}(id=${product.id})}" class="flex-1">
-                            <h4 class="font-bold text-stone-800 hover:text-amber-800 transition text-lg leading-tight" th:text="${product.name}"></h4>
+                            <h4 class="font-bold text-stone-800 hover:text-[#D4652F] transition text-lg leading-tight" th:text="${product.name}"></h4>
                         </a>
-                        <form th:action="@{/favorites/toggle/{id}(id=${product.id})}" method="post">
-                            <button type="submit" class="ml-2 text-red-500 hover:scale-125 transition">
-                                <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+
+                        <!-- Кнопка удаления из избранного -->
+                        <form th:action="@{/favorites/toggle/{id}(id=${product.id})}" method="post" class="flex-shrink-0">
+                            <button type="submit" class="p-2 rounded-xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-colors duration-300">
+                                <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                             </button>
                         </form>
                     </div>
 
-                    <div class="mt-auto flex items-center justify-between pt-4 border-t border-stone-50">
-                        <span class="text-xl font-black text-stone-900" th:text="${#numbers.formatDecimal(product.price, 1, 2) + ' Б'}"></span>
+                    <div class="mt-auto flex items-center justify-between pt-5 border-t border-stone-50">
+                        <span class="text-2xl font-black text-stone-900" th:text="${#numbers.formatDecimal(product.price, 1, 2) + ' Б'}"></span>
+
+                        <!-- В Корзину -->
                         <form th:if="${currentUser.company != null && currentUser.company.type.name() == 'CUSTOMER'}"
                               th:action="@{/cart/add/{id}(id=${product.id})}" method="post">
-                            <button type="submit" class="bg-stone-800 text-white p-3 rounded-2xl hover:bg-amber-800 transition shadow-lg shadow-amber-900/10">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                            <button type="submit" class="bg-[#1E3A8A] text-white p-3 rounded-xl hover:bg-[#152c6e] transition shadow-lg shadow-blue-900/20">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                             </button>
                         </form>
                     </div>
@@ -157,8 +188,14 @@
             </div>
         </div>
 
-        <div th:if="${favoriteProducts.isEmpty()}" class="py-24 text-center bg-white rounded-[3rem] border-2 border-dashed border-stone-100">
-            <p class="text-stone-400 text-lg font-medium italic">В избранном пока ничего нет...</p>
+        <!-- Если пусто -->
+        <div th:if="${favoriteProducts.isEmpty()}" class="py-24 text-center bg-white rounded-[3rem] border border-stone-100 shadow-sm">
+            <div class="w-20 h-20 bg-orange-50 text-[#D4652F] rounded-full flex items-center justify-center mx-auto mb-6 text-4xl shadow-inner">❤️</div>
+            <p class="text-stone-800 text-xl font-black mb-2">Ваш список избранного пуст</p>
+            <p class="text-stone-400 text-sm font-medium mb-8">Сохраняйте товары, чтобы возвращаться к ним позже</p>
+            <a href="/dashboard" class="px-8 py-4 bg-[#1E3A8A] text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-black transition shadow-lg shadow-blue-900/20">
+                Перейти в каталог
+            </a>
         </div>
     </div>
 </div>

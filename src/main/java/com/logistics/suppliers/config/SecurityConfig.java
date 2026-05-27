@@ -1,5 +1,6 @@
 package com.logistics.suppliers.config;
 
+import com.logistics.suppliers.service.CustomOAuth2UserService;
 import com.logistics.suppliers.service.JwtService;
 import io.jsonwebtoken.security.Keys;
 
@@ -23,7 +24,7 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 public class SecurityConfig {
 
     private final JwtService jwtService;
-
+    private final CustomOAuth2UserService customOAuth2UserService;
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter) throws Exception {
         http
@@ -32,12 +33,19 @@ public class SecurityConfig {
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/dashboard", "/profile/**", "/companies/**", "/analytics/**").authenticated()
 
-                        .requestMatchers("/cart/**", "/orders/**").hasAnyRole("MANAGER", "ANALYST")
+                        .requestMatchers("/cart/**", "/orders/**").hasAnyRole("MANAGER", "ANALYST", "SUPPLIER")
                         .requestMatchers("/my-products/**").hasRole("SUPPLIER")
 
-                        .requestMatchers("/login", "/register", "/css/**", "/js/**", "/register-submit", "/login-submit").permitAll()
+
+
+                        .requestMatchers("/login", "/register", "/css/**", "/js/**", "/register-submit", "/login-submit", "/forgot-password", "/auth/reset-password").permitAll()
 
                         .anyRequest().authenticated()
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/login")
+                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                        .defaultSuccessUrl("/dashboard", true)
                 )
                 .formLogin(form -> form
                         .loginPage("/login")

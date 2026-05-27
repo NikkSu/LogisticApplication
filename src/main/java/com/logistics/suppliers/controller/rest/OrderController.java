@@ -71,11 +71,17 @@ public class OrderController {
     }
     @GetMapping("/view/{id}")
     public String viewOrder(@PathVariable Long id, Model model, Authentication authentication) {
+        if (authentication == null) return "redirect:/login";
+
         User user = userRepository.findByEmail(authentication.getName())
-                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Заказ не найден"));
+
+        boolean isOwner = user.getCompany() != null &&
+                user.getCompany().getOwner() != null &&
+                user.getCompany().getOwner().getId().equals(user.getId());
 
         List<OrderItem> items = orderItemRepository.findByOrder(order);
 
@@ -83,10 +89,13 @@ public class OrderController {
                 .map(item -> item.getPrice().multiply(java.math.BigDecimal.valueOf(item.getQuantity())))
                 .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
 
+
         model.addAttribute("order", order);
         model.addAttribute("items", items);
         model.addAttribute("total", total);
         model.addAttribute("currentUser", user);
+        model.addAttribute("userEmail", user.getEmail());
+        model.addAttribute("isOwner", isOwner);
 
         return "order-view";
     }

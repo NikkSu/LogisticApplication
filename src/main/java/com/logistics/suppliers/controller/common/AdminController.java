@@ -4,10 +4,12 @@ import com.logistics.suppliers.exceptions.ResourceNotFoundException;
 import com.logistics.suppliers.model.*;
 import com.logistics.suppliers.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -25,7 +27,11 @@ public class AdminController {
     private final ProductRepository productRepository;
 
     @GetMapping("/dashboard")
-    public String adminDashboard(Model model) {
+    public String adminDashboard(Model model,  Authentication authentication) {
+        User user = userRepository.findByEmail(authentication.getName()).get();
+        model.addAttribute("currentUser", user);
+        model.addAttribute("userEmail", user.getEmail());
+
         BigDecimal turnover = orderRepository.getTotalTurnover();
         model.addAttribute("turnover", turnover != null ? turnover : BigDecimal.ZERO);
         model.addAttribute("totalCompanies", companyRepository.count());
@@ -45,6 +51,26 @@ public class AdminController {
     public String listCompanies(Model model) {
         model.addAttribute("companies", companyRepository.findAll());
         return "admin/companies";
+    }
+
+    @PostMapping("/companies/update/{id}")
+    public String adminUpdateCompany(@PathVariable Long id,
+                                     @ModelAttribute Company companyData,
+                                     RedirectAttributes redirectAttributes) {
+        Company company = companyRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Компания не найдена"));
+
+        company.setName(companyData.getName());
+        company.setContactEmail(companyData.getContactEmail());
+        company.setAddress(companyData.getAddress());
+        company.setLogoUrl(companyData.getLogoUrl());
+        company.setDescription(companyData.getDescription());
+
+        companyRepository.save(company);
+        redirectAttributes.addFlashAttribute("message", "Данные компании #" + id + " обновлены администратором");
+        redirectAttributes.addFlashAttribute("messageType", "success");
+
+        return "redirect:/admin/companies";
     }
 
     @Transactional

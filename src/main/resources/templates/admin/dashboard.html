@@ -5,110 +5,146 @@
     <title>Панель управления | Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; }
-        .kpi-card:hover .tooltip { opacity: 1; visibility: visible; }
+        body { background-color: #FFF9F8; font-family: 'Inter', sans-serif; }
+        .kpi-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .kpi-card:hover { transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgba(30, 58, 138, 0.1); border-color: #1E3A8A; }
+        .tooltip { transition: all 0.2s ease; }
+        .kpi-card:hover .tooltip { opacity: 1; visibility: visible; transform: translateY(-5px); }
     </style>
 </head>
 <body class="flex">
 
-<aside class="w-64 h-screen bg-stone-900 text-white fixed p-6 flex flex-col">
-    <h1 class="text-xl font-black mb-10 text-amber-500 italic text-center border-b border-stone-800 pb-4">Logistics Admin</h1>
-    <nav class="space-y-2 flex-1">
-        <a href="/admin/dashboard" class="block py-3 px-4 bg-amber-700 rounded-xl text-sm font-bold text-white shadow-lg">📊 Обзор системы</a>
-        <a href="/admin/companies" class="block py-3 px-4 hover:bg-stone-800 rounded-xl text-sm text-stone-400 transition font-medium">🏢 Реестр компаний</a>
-        <a href="/admin/categories" class="block py-3 px-4 hover:bg-stone-800 rounded-xl text-sm text-stone-400 transition font-medium">🏷️ Классификатор</a>
+<!-- БОКОВОЕ МЕНЮ  -->
+<aside class="w-64 h-screen bg-[#1E3A8A] text-white fixed p-8 flex flex-col shadow-2xl">
+    <div class="mb-12">
+        <h1 class="text-3xl font-extrabold leading-tight">Logistics <br/><span class="text-[#D4652F]">Admin</span></h1>
+    </div>
+    <nav class="space-y-3 flex-1">
+        <a href="/admin/dashboard" class="block py-3 px-5 bg-[#D4652F] rounded-2xl text-sm font-bold text-white shadow-lg shadow-[#D4652F]/30 transition-transform hover:scale-105"> Обзор системы</a>
+        <a href="/admin/companies" class="block py-3 px-5 hover:bg-white/10 rounded-2xl text-sm text-blue-100 transition font-medium"> Реестр компаний</a>
+        <a href="/admin/categories" class="block py-3 px-5 hover:bg-white/10 rounded-2xl text-sm text-blue-100 transition font-medium"> Классификатор</a>
     </nav>
-    <div class="pt-6 border-t border-stone-800">
+    <div class="pt-8 border-t border-blue-800/50">
         <form th:action="@{/logout}" method="post">
-            <button type="submit" class="w-full text-left py-3 px-4 text-red-400 text-xs font-bold uppercase hover:text-red-300 transition">
+            <button type="submit" class="w-full text-left py-3 px-5 text-red-300 text-xs font-black uppercase tracking-widest hover:text-white hover:bg-red-500/20 rounded-xl transition">
                 Выйти из системы
             </button>
         </form>
     </div>
 </aside>
 
-<main class="ml-64 p-10 w-full">
-    <header class="mb-12">
-        <h2 class="text-3xl font-black text-stone-800">Главный монитор</h2>
-        <p class="text-stone-400 mt-1">Пульс платформы и ключевые метрики</p>
+<!-- ОСНОВНОЙ КОНТЕНТ -->
+<main class="ml-64 p-12 w-full max-w-7xl mx-auto">
+    <header class="mb-12 flex justify-between items-end">
+        <div>
+            <h2 class="text-4xl font-black text-stone-900 tracking-tight">Главный монитор</h2>
+            <p class="text-stone-400 mt-2 font-medium">Пульс платформы и ключевые метрики</p>
+        </div>
+        <div class="px-4 py-2 bg-white border border-stone-200 rounded-full text-[10px] font-black uppercase tracking-widest text-stone-500 shadow-sm">
+            Администратор
+        </div>
     </header>
 
     <!-- KPI С ПОДСКАЗКАМИ -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
-
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
         <!-- ОБОРОТ -->
-        <div class="relative group kpi-card bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm transition-all hover:border-blue-200">
+        <div class="relative group kpi-card bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm">
             <p class="text-[10px] font-black uppercase text-stone-400 tracking-widest mb-3">Оборот системы</p>
-            <p class="text-3xl font-black text-blue-600">[[${turnover}]] <span class="text-stone-300 text-xl font-medium ml-1">Б</span></p>
-            <div class="tooltip opacity-0 visibility-hidden absolute -top-12 left-0 w-full bg-stone-800 text-white text-[10px] p-2 rounded-lg transition-all text-center">
-                Сумма всех заказов со статусом "Доставлено"
+            <p class="text-3xl font-black text-[#1E3A8A]">[[${turnover}]] <span class="text-stone-300 text-xl font-medium ml-1">Б</span></p>
+            <div class="tooltip opacity-0 visibility-hidden absolute -top-14 left-0 w-full bg-stone-900 text-white text-[10px] p-3 rounded-xl text-center z-10 shadow-lg">
+                Сумма заказов со статусом "Доставлено"
+                <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-stone-900"></div>
             </div>
         </div>
 
         <!-- КОМПАНИИ -->
-        <div class="relative group kpi-card bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm transition-all hover:border-amber-200">
+        <div class="relative group kpi-card bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm">
             <p class="text-[10px] font-black uppercase text-stone-400 tracking-widest mb-3">Компаний</p>
-            <p class="text-3xl font-black text-stone-800">[[${totalCompanies}]]</p>
-            <div class="tooltip opacity-0 visibility-hidden absolute -top-12 left-0 w-full bg-stone-800 text-white text-[10px] p-2 rounded-lg transition-all text-center">
-                Всего зарегистрированных юрлиц (Поставщики + Заказчики)
+            <p class="text-3xl font-black text-stone-900">[[${totalCompanies}]]</p>
+            <div class="tooltip opacity-0 visibility-hidden absolute -top-14 left-0 w-full bg-stone-900 text-white text-[10px] p-3 rounded-xl text-center z-10 shadow-lg">
+                Поставщики и Заказчики
+                <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-stone-900"></div>
             </div>
         </div>
 
         <!-- СДЕЛКИ -->
-        <div class="relative group kpi-card bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm transition-all hover:border-amber-200">
+        <div class="relative group kpi-card bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm">
             <p class="text-[10px] font-black uppercase text-stone-400 tracking-widest mb-3">Всего сделок</p>
-            <p class="text-3xl font-black text-stone-800">[[${totalOrders}]]</p>
-            <div class="tooltip opacity-0 visibility-hidden absolute -top-12 left-0 w-full bg-stone-800 text-white text-[10px] p-2 rounded-lg transition-all text-center">
-                Общее количество созданных заказов за всё время
+            <p class="text-3xl font-black text-stone-900">[[${totalOrders}]]</p>
+            <div class="tooltip opacity-0 visibility-hidden absolute -top-14 left-0 w-full bg-stone-900 text-white text-[10px] p-3 rounded-xl text-center z-10 shadow-lg">
+                Общее количество заказов
+                <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-stone-900"></div>
             </div>
         </div>
 
         <!-- ПОЛЬЗОВАТЕЛИ -->
-        <div class="relative group kpi-card bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm transition-all hover:border-amber-200">
+        <div class="relative group kpi-card bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm">
             <p class="text-[10px] font-black uppercase text-stone-400 tracking-widest mb-3">Пользователей</p>
-            <p class="text-3xl font-black text-stone-800">[[${totalUsers}]]</p>
-            <div class="tooltip opacity-0 visibility-hidden absolute -top-12 left-0 w-full bg-stone-800 text-white text-[10px] p-2 rounded-lg transition-all text-center">
-                Общее количество аккаунтов в системе (включая админов и сотрудников)
+            <p class="text-3xl font-black text-stone-900">[[${totalUsers}]]</p>
+            <div class="tooltip opacity-0 visibility-hidden absolute -top-14 left-0 w-full bg-stone-900 text-white text-[10px] p-3 rounded-xl text-center z-10 shadow-lg">
+                Все аккаунты системы
+                <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-stone-900"></div>
             </div>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+    <!-- АНАЛИТИКА И ЗАКАЗЫ -->
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
         <!-- ГРАФИК РЕГИСТРАЦИЙ -->
-        <div class="bg-white p-10 rounded-[3rem] border border-stone-100 shadow-sm">
-            <h3 class="font-black text-stone-800 mb-8 flex items-center">
-                <span class="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+        <div class="bg-white p-10 rounded-[3rem] border border-stone-100 shadow-sm flex flex-col h-[450px]">
+            <h3 class="font-black text-stone-900 mb-8 flex items-center text-xl">
+                <span class="w-3 h-3 bg-[#D4652F] rounded-full mr-3 shadow-[0_0_10px_rgba(212,101,47,0.5)]"></span>
                 Динамика регистраций
             </h3>
-            <div class="h-64"><canvas id="regChart"></canvas></div>
+            <div class="flex-1 relative w-full">
+                <canvas id="regChart"></canvas>
+            </div>
         </div>
 
         <!-- ПОСЛЕДНИЕ ЗАКАЗЫ -->
-        <div class="bg-white p-10 rounded-[3rem] border border-stone-100 shadow-sm">
-            <h3 class="font-black text-stone-800 mb-8 flex items-center">
-                <span class="w-2 h-2 bg-amber-500 rounded-full mr-3"></span>
-                Последние 5 заказов
-            </h3>
-            <div class="space-y-4">
-                <div th:each="order : ${latestOrders}" class="flex items-center justify-between p-4 bg-stone-50 rounded-2xl">
+        <div class="bg-white p-10 rounded-[3rem] border border-stone-100 shadow-sm flex flex-col h-[450px]">
+            <div class="flex justify-between items-center mb-8">
+                <h3 class="font-black text-stone-900 flex items-center text-xl">
+                    <span class="w-3 h-3 bg-[#1E3A8A] rounded-full mr-3 shadow-[0_0_10px_rgba(30,58,138,0.5)]"></span>
+                    Последние 5 заказов
+                </h3>
+            </div>
+
+            <div class="flex-1 overflow-y-auto pr-2 space-y-4">
+                <div th:each="order : ${latestOrders}" class="flex items-center justify-between p-5 bg-[#FFF9F8] rounded-2xl border border-stone-100 hover:border-[#D4652F] transition">
                     <div>
-                        <p class="font-bold text-stone-800 text-sm" th:text="${order.customerCompany.name} + ' → ' + ${order.supplierCompany.name}"></p>
-                        <p class="text-[10px] text-stone-400 uppercase font-black" th:text="${#temporals.format(order.createdAt, 'dd.MM HH:mm')}"></p>
+                        <p class="font-bold text-stone-800 text-sm mb-1">
+                            <span th:text="${order.customerCompany.name}"></span>
+                            <span class="text-stone-300 mx-1">→</span>
+                            <span th:text="${order.supplierCompany.name}"></span>
+                        </p>
+                        <p class="text-[10px] text-stone-400 uppercase font-black tracking-wider" th:text="${#temporals.format(order.createdAt, 'dd.MM HH:mm')}"></p>
                     </div>
-                    <div class="text-right">
-                        <p class="font-black text-stone-900" th:text="${order.totalPrice != null ? order.totalPrice : '0'} + ' Б'"></p>
-                        <span class="text-[8px] px-2 py-0.5 rounded-full bg-white border border-stone-200 uppercase font-bold" th:text="${order.status}"></span>
+                    <div class="text-right flex flex-col items-end">
+                        <p class="font-black text-[#1E3A8A] text-lg leading-none mb-2" th:text="${order.totalPrice != null ? order.totalPrice : '0'} + ' Б'"></p>
+                        <span class="text-[9px] px-3 py-1 rounded-full bg-white border border-stone-200 uppercase font-black text-stone-500 tracking-widest shadow-sm" th:text="${order.status}"></span>
                     </div>
                 </div>
-                <div th:if="${latestOrders.isEmpty()}" class="py-10 text-center text-stone-400 italic">Сделок пока не было</div>
+                <div th:if="${latestOrders.isEmpty()}" class="h-full flex items-center justify-center text-stone-400 italic font-medium">
+                    Сделок пока не было
+                </div>
             </div>
         </div>
     </div>
 </main>
 
 <script th:inline="javascript">
+    Chart.defaults.font.family = 'Inter, sans-serif';
+
     const ctx = document.getElementById('regChart').getContext('2d');
+
+    // Создаем градиент под линией в новом стиле
+    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+    gradient.addColorStop(0, 'rgba(212, 101, 47, 0.2)'); // #D4652F с прозрачностью
+    gradient.addColorStop(1, 'rgba(255, 249, 248, 0)');  // #FFF9F8
+
     new Chart(ctx, {
         type: 'line',
         data: {
@@ -116,14 +152,27 @@
             datasets: [{
                 label: 'Новые пользователи',
                 data: [[${regValues}]],
-                borderColor: '#3b82f6',
-                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                borderColor: '#D4652F',
+                backgroundColor: gradient,
+                borderWidth: 3,
                 fill: true,
                 tension: 0.4,
-                pointRadius: 5
+                pointBackgroundColor: '#1E3A8A',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7
             }]
         },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { display: false }, ticks: { font: { weight: 'bold' } } },
+                y: { border: { display: false }, grid: { color: '#f5f5f4' } }
+            }
+        }
     });
 </script>
 

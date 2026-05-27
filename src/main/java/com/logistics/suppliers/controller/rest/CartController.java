@@ -5,7 +5,9 @@ import com.logistics.suppliers.model.Company;
 import com.logistics.suppliers.model.Product;
 import com.logistics.suppliers.model.User;
 import com.logistics.suppliers.repository.CartItemRepository;
+import com.logistics.suppliers.repository.CompanyRepository;
 import com.logistics.suppliers.repository.UserRepository;
+import com.logistics.suppliers.service.AnalyticsService;
 import com.logistics.suppliers.service.CartService;
 import com.logistics.suppliers.service.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +17,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -27,18 +30,37 @@ public class CartController {
     private final ProductService productService;
     private final UserRepository userRepository;
     private final CartItemRepository cartItemRepository;
+    private final AnalyticsService analyticsService;
 
     @GetMapping
     public String viewCart(Model model, Authentication authentication) {
         User user = userRepository.findByEmail(authentication.getName()).get();
-        List<CartItem> items = cartService.getCartForCompany(user.getCompany());
+        Company company = user.getCompany();
+        if (company == null) return "redirect:/companies";
+
+        List<CartItem> items = cartService.getCartForCompany(company);
+        BigDecimal cartTotal = cartService.calculateTotal(items);
+
+        BigDecimal monthlyLimit = company.getMonthlyBudget() != null ? company.getMonthlyBudget() : BigDecimal.ZERO;
+        BigDecimal spentThisMonth = analyticsService.getSpentThisMonth(company);
+        BigDecimal totalAfterOrder = spentThisMonth.add(cartTotal);
+
+        BigDecimal excess = BigDecimal.ZERO;
+        if (monthlyLimit.compareTo(BigDecimal.ZERO) > 0 && totalAfterOrder.compareTo(monthlyLimit) > 0) {
+            excess = totalAfterOrder.subtract(monthlyLimit);
+        }
 
         Map<Company, List<CartItem>> groupedItems = items.stream()
                 .collect(Collectors.groupingBy(item -> item.getProduct().getSupplier()));
 
         model.addAttribute("groupedItems", groupedItems);
         model.addAttribute("items", items);
-        model.addAttribute("total", cartService.calculateTotal(items));
+        model.addAttribute("total", cartTotal);
+        model.addAttribute("monthlyLimit", monthlyLimit);
+        model.addAttribute("spentThisMonth", spentThisMonth);
+        model.addAttribute("isOverBudget", excess.compareTo(BigDecimal.ZERO) > 0);
+        model.addAttribute("excessAmount", excess);
+
         return "cart";
     }
 

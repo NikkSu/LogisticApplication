@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +22,7 @@ public class AuthService {
 
     private final CompanyRequestRepository requestRepository;
     private final UserMapper userMapper;
+    private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final CompanyRepository companyRepository;
@@ -66,5 +68,24 @@ public class AuthService {
 
         String token = jwtService.generateToken(user);
         return new AuthResponse(token);
+    }
+
+    @Transactional
+    public void sendTemporaryPassword(String email) {
+
+        String searchEmail = email.toLowerCase();
+
+        User user = userRepository.findByEmail(searchEmail)
+                .orElseThrow(() -> new RuntimeException("Пользователь с Email [" + searchEmail + "] не найден"));
+
+        String tempPassword = UUID.randomUUID().toString().substring(0, 8);
+
+        user.setPassword(passwordEncoder.encode(tempPassword));
+        userRepository.save(user);
+
+        String message = "Здравствуйте!\n\nВаш временный пароль для входа в Logistics Hub: " + tempPassword +
+                "\n\nПосле входа настоятельно рекомендуем сменить его в личном профиле.";
+
+        emailService.sendEmail(user.getEmail(), "Временный пароль", message);
     }
 }

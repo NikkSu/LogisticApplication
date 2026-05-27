@@ -47,5 +47,7 @@ public class User {
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    private boolean enabled = false;
+
     private boolean canManageEmployees = false;
 }

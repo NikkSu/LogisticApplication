@@ -32,8 +32,7 @@ public class CompanyController {
         User currentUser = userRepository.findByEmail(authentication.getName()).get();
 
         if (currentUser.getCompany() != null) {
-            model.addAttribute("userCompany", currentUser.getCompany());
-            return "companies";
+            return "redirect:/companies/my";
         }
 
         model.addAttribute("suppliers", companyService.getCompaniesByType(CompanyType.SUPPLIER));
